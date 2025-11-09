@@ -6,6 +6,7 @@ export interface Track {
   filePath: string;
   fileName: string;
   albumArt?: string; // ruta al archivo de imagen del álbum
+  embeddedCoverUrl?: string; // URL del cover embebido en el archivo de audio
 }
 
 export interface Playlist {

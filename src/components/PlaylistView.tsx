@@ -23,7 +23,7 @@ export default function PlaylistView({
   const totalProgress = totalDuration > 0 ? (currentPlaylistTime / totalDuration) * 100 : 0;
 
   return (
-    <div className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 shadow-[0_8px_32px_rgba(249,182,157,0.2)] border border-white/80 flex flex-col gap-8 flex-1 overflow-hidden">
+    <div className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 shadow-[0_8px_32px_rgba(249,182,157,0.2)] border border-white/80 flex flex-col gap-8 flex-1 min-h-0">
       {/* Header de la playlist */}
       <div className="flex flex-col gap-6">
         <div>
@@ -61,7 +61,8 @@ export default function PlaylistView({
             <p className="m-0 text-sm text-[#d4725c]/60 font-light">{t('selectFolderWithM3u8')}</p>
           </div>
         ) : (
-          tracks.map((track, index) => (
+          <>
+            {tracks.map((track, index) => (
             <button
               type="button"
               key={track.id}
@@ -103,7 +104,10 @@ export default function PlaylistView({
                 {formatTime(track.duration)}
               </div>
             </button>
-          ))
+            ))}
+            {/* Espaciador para evitar que el reproductor tape las últimas canciones */}
+            <div className="h-64" aria-hidden="true" />
+          </>
         )}
       </div>
     </div>

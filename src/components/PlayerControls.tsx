@@ -5,6 +5,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 
 interface PlayerControlsProps {
   currentTrack: Track | null;
+  currentAlbumArt?: string | null;
   isPlaying: boolean;
   currentTime: number;
   volume: number;
@@ -23,6 +24,7 @@ interface PlayerControlsProps {
 
 export default function PlayerControls({
   currentTrack,
+  currentAlbumArt,
   isPlaying,
   currentTime,
   volume,
@@ -58,18 +60,44 @@ export default function PlayerControls({
   const progressPercentage = actualDuration > 0 ? (currentTime / actualDuration) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-3xl border-t border-white/80 p-8 sm:p-10 shadow-[0_-10px_40px_rgba(249,182,157,0.25)] flex flex-col gap-7">
-      {/* Información del track actual */}
-      <div className="text-center min-h-14">
-        {currentTrack ? (
-          <>
-            <div className="text-2xl sm:text-3xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] mb-2">{currentTrack.title}</div>
-            {currentTrack.artist && <div className="text-base sm:text-lg text-[#d4725c] font-normal">{currentTrack.artist}</div>}
-          </>
-        ) : (
-          <div className="text-base text-[#d4725c]/60 py-4 font-light">{t('noTrackSelected')}</div>
-        )}
-      </div>
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-3xl border-t border-white/80 p-8 sm:p-10 shadow-[0_-10px_40px_rgba(249,182,157,0.25)]">
+      <div className="flex gap-6 items-center max-w-7xl mx-auto">
+        {/* Cover de la canción en el lado izquierdo */}
+        <div className="flex-shrink-0 hidden sm:block">
+          {currentAlbumArt ? (
+            <div className="w-32 h-32 rounded-lg overflow-hidden shadow-[0_8px_30px_rgba(249,182,157,0.3)] ring-2 ring-white/50">
+              <img
+                src={currentAlbumArt}
+                alt={currentTrack?.title || 'Album cover'}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-32 h-32 rounded-lg bg-gradient-to-br from-[#f9b69d] to-[#ff9999] flex items-center justify-center shadow-[0_8px_30px_rgba(249,182,157,0.3)] ring-2 ring-white/50">
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-16 h-16 text-white/60"
+              >
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+              </svg>
+            </div>
+          )}
+        </div>
+
+        {/* Contenedor de controles y progreso */}
+        <div className="flex-1 flex flex-col gap-5">
+          {/* Información del track actual */}
+          <div className="text-left min-h-14">
+            {currentTrack ? (
+              <>
+                <div className="text-2xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] mb-1 truncate">{currentTrack.title}</div>
+                {currentTrack.artist && <div className="text-base text-[#d4725c] font-normal truncate">{currentTrack.artist}</div>}
+              </>
+            ) : (
+              <div className="text-base text-[#d4725c]/60 py-4 font-light">{t('noTrackSelected')}</div>
+            )}
+          </div>
 
       {/* Barra de progreso */}
       <div className="flex items-center gap-5 px-4">
@@ -208,6 +236,9 @@ export default function PlayerControls({
           aria-label={t('volumeControl')}
           className="w-28 h-1 appearance-none bg-white/40 rounded-full outline-none transition-all [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-linear-to-br [&::-webkit-slider-thumb]:from-[#f9b69d] [&::-webkit-slider-thumb]:to-[#ff9999] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110 [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:bg-linear-to-br [&::-moz-range-thumb]:from-[#f9b69d] [&::-moz-range-thumb]:to-[#ff9999] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:shadow-lg"
         />
+      </div>
+
+        </div>
       </div>
 
       {/* Audio element oculto */}
