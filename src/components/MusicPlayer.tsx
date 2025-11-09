@@ -6,9 +6,16 @@ import {
 	calculateTotalDuration,
 } from "../utils/m3u8Parser";
 import { extractEmbeddedCover } from "../utils/coverExtractor";
+import {
+	savePlaylist,
+	loadLastPlaylist,
+	loadPlaylistById,
+	hasStoredPlaylists,
+} from "../utils/playlistStorage";
 import PlayerControls from "./PlayerControls";
 import PlaylistView from "./PlaylistView";
 import LanguageSelector from "./LanguageSelector";
+import SavedPlaylists from "./SavedPlaylists";
 import { useLanguage } from "../i18n/LanguageContext";
 import logo from "../assets/logo.svg";
 
@@ -35,8 +42,80 @@ export default function MusicPlayer() {
 		new Map(),
 	);
 	const [currentPlaylistTime, setCurrentPlaylistTime] = useState(0);
+	const [isLoadingStorage, setIsLoadingStorage] = useState(true);
+	const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(
+		null,
+	);
+	const [showSavedPlaylists, setShowSavedPlaylists] = useState(false);
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Restaurar playlist guardada al iniciar
+	useEffect(() => {
+		const restorePlaylist = async () => {
+			if (hasStoredPlaylists()) {
+				console.log("🔄 Restaurando última playlist...");
+				const stored = await loadLastPlaylist();
+
+				if (stored.playlist && stored.audioFiles.size > 0) {
+					setPlaylist(stored.playlist);
+					setAudioFiles(stored.audioFiles);
+					setAlbumArtUrls(stored.albumArtUrls);
+					setCurrentPlaylistId(stored.playlistId);
+
+					if (stored.playerState) {
+						setPlayerState(stored.playerState);
+
+						// Calcular tiempo total de la playlist hasta el track actual
+						let totalTime = 0;
+						for (let i = 0; i < stored.playerState.currentTrackIndex; i++) {
+							totalTime += stored.playlist.tracks[i]?.duration || 0;
+						}
+						totalTime += stored.playerState.currentTime;
+						setCurrentPlaylistTime(totalTime);
+					}
+
+					console.log("✅ Playlist restaurada desde almacenamiento");
+				}
+			}
+			setIsLoadingStorage(false);
+		};
+
+		restorePlaylist();
+	}, []);
+
+	// Guardar playlist cuando cambie (con debounce)
+	useEffect(() => {
+		if (isLoadingStorage || playlist.tracks.length === 0) return;
+
+		const timeoutId = setTimeout(() => {
+			console.log("💾 Guardando playlist...");
+			savePlaylist(
+				playlist,
+				audioFiles,
+				albumArtUrls,
+				playerState,
+				currentPlaylistId || undefined,
+			)
+				.then((id) => {
+					if (!currentPlaylistId) {
+						setCurrentPlaylistId(id);
+					}
+				})
+				.catch((error) => {
+					console.error("Error al guardar playlist:", error);
+				});
+		}, 1000); // Guardar 1 segundo después del último cambio
+
+		return () => clearTimeout(timeoutId);
+	}, [
+		playlist,
+		audioFiles,
+		albumArtUrls,
+		playerState,
+		isLoadingStorage,
+		currentPlaylistId,
+	]);
 
 	// Cargar archivo de audio cuando cambia el track
 	useEffect(() => {
@@ -353,6 +432,37 @@ export default function MusicPlayer() {
 				isPlaying: true,
 			}));
 			setCurrentPlaylistTime(0);
+
+			// Marcar que ya no estamos cargando desde storage
+			setIsLoadingStorage(false);
+
+			// Guardar inmediatamente la playlist
+			setTimeout(() => {
+				savePlaylist(
+					{
+						name: m3u8File.name.replace(/\.(m3u8|m3u)$/i, ""),
+						tracks: tracksWithDuration,
+						totalDuration,
+					},
+					audioMap,
+					artMap,
+					{
+						isPlaying: false,
+						currentTrackIndex: 0,
+						currentTime: 0,
+						volume: playerState.volume,
+						repeat: playerState.repeat,
+						shuffle: playerState.shuffle,
+					},
+					undefined, // Nuevo ID para nueva playlist
+				)
+					.then((id) => {
+						setCurrentPlaylistId(id);
+					})
+					.catch((error) => {
+						console.error("Error al guardar playlist inicial:", error);
+					});
+			}, 100);
 		} catch (error) {
 			console.error("Error al cargar la playlist:", error);
 			alert(t("errorLoadingPlaylist"));
@@ -448,6 +558,44 @@ export default function MusicPlayer() {
 			currentTime: 0,
 			isPlaying: true,
 		}));
+	};
+
+	const handleLoadSavedPlaylist = async (playlistId: string) => {
+		try {
+			setIsLoadingStorage(true);
+			console.log(`🔄 Cargando playlist guardada: ${playlistId}`);
+			const stored = await loadPlaylistById(playlistId);
+
+			if (stored.playlist && stored.audioFiles.size > 0) {
+				setPlaylist(stored.playlist);
+				setAudioFiles(stored.audioFiles);
+				setAlbumArtUrls(stored.albumArtUrls);
+				setCurrentPlaylistId(stored.playlistId);
+
+				if (stored.playerState) {
+					// Activar reproducción automática al cambiar de playlist
+					setPlayerState({
+						...stored.playerState,
+						isPlaying: true,
+					});
+
+					// Calcular tiempo total de la playlist hasta el track actual
+					let totalTime = 0;
+					for (let i = 0; i < stored.playerState.currentTrackIndex; i++) {
+						totalTime += stored.playlist.tracks[i]?.duration || 0;
+					}
+					totalTime += stored.playerState.currentTime;
+					setCurrentPlaylistTime(totalTime);
+				}
+
+				console.log("✅ Playlist cargada exitosamente y reproduciendo");
+			}
+		} catch (error) {
+			console.error("Error al cargar playlist guardada:", error);
+			alert(t("errorLoadingPlaylist"));
+		} finally {
+			setIsLoadingStorage(false);
+		}
 	};
 
 	const currentTrack = playlist.tracks[playerState.currentTrackIndex] || null;
@@ -560,6 +708,38 @@ export default function MusicPlayer() {
 		<>
 
 			<div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-12 gap-4 sm:gap-6 animate-[fadeIn_0.6s_ease-out] relative z-10 min-h-0">
+				{/* Mensaje de carga desde storage */}
+				{isLoadingStorage && (
+					<div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-xl px-6 py-3 rounded-full shadow-lg border border-[#fce5e8]/40 animate-[fadeIn_0.3s_ease-out]">
+						<div className="flex items-center gap-3">
+							<svg
+								className="animate-spin h-5 w-5 text-[#d4725c]"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+							>
+								<circle
+									className="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									strokeWidth="4"
+								/>
+								<path
+									className="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								/>
+							</svg>
+							<span className="text-[#d4725c] font-medium">
+								{t("loadingPlaylist") || "Cargando playlist..."}
+							</span>
+						</div>
+					</div>
+				)}
+
 				{/* Header con botón para cargar playlist */}
 				<div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-6 lg:gap-8 mb-2">
 					<h1 className="flex items-center gap-2 sm:gap-3 text-3xl sm:text-4xl lg:text-5xl font-logo font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0 shrink-0">
@@ -575,6 +755,33 @@ export default function MusicPlayer() {
 
 					<div className="flex items-center gap-2 sm:gap-3 lg:gap-4 relative">
 						<LanguageSelector />
+
+						{/* Botón de playlists guardadas */}
+						{hasStoredPlaylists() && (
+							<button
+								type="button"
+								className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/70 backdrop-blur-xl text-[#d4725c] border border-[#fce5e8]/40 rounded-full text-sm font-medium cursor-pointer transition-all hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(249,182,157,0.2)] hover:-translate-y-0.5 active:translate-y-0"
+								onClick={() => setShowSavedPlaylists(true)}
+								aria-label={t("savedPlaylists") || "Playlists guardadas"}
+							>
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="w-4 h-4 sm:w-5 sm:h-5"
+									aria-hidden="true"
+								>
+									<title>{t("savedPlaylists") || "Playlists guardadas"}</title>
+									<path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+								</svg>
+								<span className="hidden sm:inline">
+									{t("playlists") || "Playlists"}
+								</span>
+							</button>
+						)}
 
 						<div className="relative">
 							<button
@@ -701,6 +908,15 @@ export default function MusicPlayer() {
 				/>
 			)}
 			</div>
+
+			{/* Modal de playlists guardadas */}
+			{showSavedPlaylists && (
+				<SavedPlaylists
+					currentPlaylistId={currentPlaylistId}
+					onLoadPlaylist={handleLoadSavedPlaylist}
+					onClose={() => setShowSavedPlaylists(false)}
+				/>
+			)}
 		</>
 	);
 }

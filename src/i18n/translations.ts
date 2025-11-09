@@ -10,6 +10,7 @@ export const translations = {
     errorLoadingPlaylist: 'Error loading playlist. Please check the m3u8 file format.',
     errorPlaying: 'Error playing:',
     noTrackSelected: 'No track selected',
+    loadingPlaylist: 'Loading playlist...',
 
     // Playlist
     track: 'track',
@@ -42,7 +43,18 @@ export const translations = {
     emptyStateDescription3: 'Because sometimes, what you need isn\'t more features.',
     emptyStateDescription3Line2: 'It\'s the right feature.',
     emptyStateCallToAction: 'Load your playlist. Play. Breathe.',
-    emptyStateSubtitle: 'Simple as it should be.'
+    emptyStateSubtitle: 'Simple as it should be.',
+
+    // Saved playlists
+    savedPlaylists: 'Saved Playlists',
+    playlists: 'Playlists',
+    noSavedPlaylists: 'No saved playlists',
+    loadPlaylistToSave: 'Load a playlist to save it automatically',
+    confirmDeletePlaylist: 'Delete this playlist?',
+    errorDeletingPlaylist: 'Error deleting playlist',
+    active: 'Active',
+    delete: 'Delete',
+    close: 'Close'
   },
   es: {
     // Encabezado principal
@@ -52,15 +64,16 @@ export const translations = {
     // Alertas y mensajes
     noM3u8Found: 'No se encontró un archivo m3u8 o m3u en la carpeta seleccionada',
     noAudioFilesFound: 'No se encontraron archivos de audio correspondientes a las pistas del m3u8',
-    errorLoadingPlaylist: 'Error al cargar la playlist. Verifica el formato del archivo m3u8.',
+    errorLoadingPlaylist: 'Error al cargar la lista. Verifica el formato del archivo m3u8.',
     errorPlaying: 'Error al reproducir:',
     noTrackSelected: 'No hay pista seleccionada',
+    loadingPlaylist: 'Cargando lista...',
 
     // Playlist
     track: 'pista',
     tracks: 'pistas',
     totalProgress: 'Progreso total',
-    noTracksInPlaylist: 'No hay pistas en la playlist',
+    noTracksInPlaylist: 'No hay pistas en la lista',
     selectFolderWithM3u8: 'Selecciona una carpeta con un archivo m3u8',
 
     // Controles del reproductor
@@ -86,8 +99,19 @@ export const translations = {
     emptyStateDescription2: 'Una barra de progreso simple. Clara. Para toda tu playlist.',
     emptyStateDescription3: 'Porque a veces, lo que necesitas no es más funciones.',
     emptyStateDescription3Line2: 'Es la función correcta.',
-    emptyStateCallToAction: 'Carga tu playlist. Reproduce. Respira.',
-    emptyStateSubtitle: 'Simple como debería ser.'
+    emptyStateCallToAction: 'Carga tu lista. Reproduce. Respira.',
+    emptyStateSubtitle: 'Simple como debería ser.',
+
+    // Playlists guardadas
+    savedPlaylists: 'Listas Guardadas',
+    playlists: 'Listas',
+    noSavedPlaylists: 'No hay listas guardadas',
+    loadPlaylistToSave: 'Carga una lista para guardarla automáticamente',
+    confirmDeletePlaylist: '¿Eliminar esta lista?',
+    errorDeletingPlaylist: 'Error al eliminar la lista',
+    active: 'Activa',
+    delete: 'Eliminar',
+    close: 'Cerrar'
   }
 } as const;
 
