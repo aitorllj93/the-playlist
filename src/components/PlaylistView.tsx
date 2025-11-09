@@ -23,7 +23,7 @@ export default function PlaylistView({
   const totalProgress = totalDuration > 0 ? (currentPlaylistTime / totalDuration) * 100 : 0;
 
   return (
-    <div className="bg-white/50 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 shadow-[0_8px_32px_rgba(249,182,157,0.12)] border border-white/60 flex flex-col gap-8 flex-1 overflow-hidden">
+    <div className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 shadow-[0_8px_32px_rgba(249,182,157,0.2)] border border-white/80 flex flex-col gap-8 flex-1 overflow-hidden">
       {/* Header de la playlist */}
       <div className="flex flex-col gap-6">
         <div>

@@ -361,7 +361,7 @@ export default function MusicPlayer() {
           }}
         >
           {/* Overlay para oscurecer y dar efecto blur */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl" />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
         </div>
       )}
 

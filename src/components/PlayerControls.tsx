@@ -58,7 +58,7 @@ export default function PlayerControls({
   const progressPercentage = actualDuration > 0 ? (currentTime / actualDuration) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/40 backdrop-blur-3xl border-t border-white/50 p-8 sm:p-10 shadow-[0_-10px_40px_rgba(249,182,157,0.15)] flex flex-col gap-7">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-3xl border-t border-white/80 p-8 sm:p-10 shadow-[0_-10px_40px_rgba(249,182,157,0.25)] flex flex-col gap-7">
       {/* Información del track actual */}
       <div className="text-center min-h-14">
         {currentTrack ? (
