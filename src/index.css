@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --color-her-pink: #fce5e8;
+  --color-her-orange: #f9b69d;
+  --color-her-peach: #fec5b2;
+  --color-her-cream: #fef0e8;
+  --color-her-beige: #f5e8dd;
+  --color-her-coral: #ff9999;
+}
+
+@keyframes playing {
+  0%, 100% {
+    height: 0.35rem;
+    opacity: 0.6;
+  }
+  50% {
+    height: 1.2rem;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar personalizado estilo Her/Apple Music */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--color-her-orange), var(--color-her-peach));
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--color-her-peach), var(--color-her-coral));
+}

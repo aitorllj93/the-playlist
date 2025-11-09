@@ -1,0 +1,12 @@
+#EXTM3U
+#EXTINF:180,Ejemplo Artista 1 - Canción de Ejemplo 1
+cancion1.mp3
+#EXTINF:240,Ejemplo Artista 2 - Canción de Ejemplo 2
+cancion2.mp3
+#EXTINF:200,Ejemplo Artista 3 - Canción de Ejemplo 3
+cancion3.mp3
+#EXTINF:220,Ejemplo Artista 1 - Canción de Ejemplo 4
+cancion4.mp3
+#EXTINF:195,Ejemplo Artista 4 - Canción de Ejemplo 5
+cancion5.mp3
+
