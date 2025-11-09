@@ -1,4 +1,4 @@
-# The Playlist
+# [The Playlist](http://aitorllamas.com/the-playlist/)
 
 Finally, an m3u8 player that shows you where you are.
 
