@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
 	getSavedPlaylists,
 	deletePlaylist,
@@ -86,24 +87,33 @@ export default function SavedPlaylists({
 	};
 
 	return (
-		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
-			onClick={onClose}
-		>
-			<div
-				className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#fce5e8]/40 p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col"
-				onClick={(e) => e.stopPropagation()}
-				style={{
-					backgroundImage: playlists.length > 0 ? `url(${ilustration})` : 'none',
-					backgroundPosition: 'center top',
-					backgroundRepeat: 'no-repeat',
-					backgroundSize: 'contain',
-					backgroundOrigin: 'content-box',
-				}}
+		<AnimatePresence>
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				transition={{ duration: 0.2 }}
+				className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+				onClick={onClose}
 			>
+				<motion.div
+					initial={{ opacity: 0, scale: 0.95, y: 20 }}
+					animate={{ opacity: 1, scale: 1, y: 0 }}
+					exit={{ opacity: 0, scale: 0.95, y: 20 }}
+					transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+					className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#fce5e8]/40 p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col"
+					onClick={(e) => e.stopPropagation()}
+					style={{
+						backgroundImage: playlists.length > 0 ? `url(${ilustration})` : 'none',
+						backgroundPosition: 'center top',
+						backgroundRepeat: 'no-repeat',
+						backgroundSize: 'contain',
+						backgroundOrigin: 'content-box',
+					}}
+				>
 				{/* Overlay para mejorar legibilidad */}
 				{playlists.length > 0 && (
-					<div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/80 to-white/95 rounded-2xl pointer-events-none" />
+					<div className="absolute inset-0 bg-linear-to-b from-white/60 via-white/80 to-white/95 rounded-2xl pointer-events-none" />
 				)}
 
 				{/* Contenido con z-index para estar sobre el fondo */}
@@ -167,14 +177,24 @@ export default function SavedPlaylists({
 						</div>
 					) : (
 						<div className="space-y-3">
-							{playlists.map((playlist) => {
+							{playlists.map((playlist, index) => {
 								const isActive = playlist.id === currentPlaylistId;
 								const isDeleting = deletingId === playlist.id;
 
 								return (
-									<button
+									<motion.button
 										key={playlist.id}
 										type="button"
+										initial={{ opacity: 0, x: -20 }}
+										animate={{ opacity: 1, x: 0 }}
+										exit={{ opacity: 0, scale: 0.95 }}
+										transition={{
+											duration: 0.3,
+											delay: index * 0.05,
+											ease: [0.16, 1, 0.3, 1]
+										}}
+										whileHover={{ scale: 1.02 }}
+										whileTap={{ scale: 0.98 }}
 										onClick={() => handleLoadPlaylist(playlist.id)}
 										disabled={isDeleting}
 										className={`w-full text-left p-4 rounded-xl border transition-all ${
@@ -289,15 +309,16 @@ export default function SavedPlaylists({
 												)}
 											</button>
 										</div>
-									</button>
+									</motion.button>
 								);
 							})}
 						</div>
 					)}
 				</div>
 				</div>
-			</div>
-		</div>
+			</motion.div>
+		</motion.div>
+		</AnimatePresence>
 	);
 }
 

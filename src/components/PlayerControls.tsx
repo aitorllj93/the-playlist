@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { Track } from '../types/music';
 import { formatTime } from '../utils/m3u8Parser';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -60,43 +61,80 @@ export default function PlayerControls({
   const progressPercentage = actualDuration > 0 ? (currentTime / actualDuration) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-3xl border-t border-white/80 p-4 sm:p-5 shadow-[0_-10px_40px_rgba(249,182,157,0.25)]">
-      <div className="flex gap-4 items-center max-w-7xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 100 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-3xl border-t border-white/80 shadow-[0_-10px_40px_rgba(249,182,157,0.25)]"
+    >
+      <div className="flex gap-4 items-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5">
         {/* Cover de la canción en el lado izquierdo */}
-        <div className="flex-shrink-0 hidden sm:block">
-          {currentAlbumArt ? (
-            <div className="w-36 h-36 rounded-lg overflow-hidden shadow-[0_8px_30px_rgba(249,182,157,0.3)] ring-2 ring-white/50">
-              <img
-                src={currentAlbumArt}
-                alt={currentTrack?.title || 'Album cover'}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="w-28 h-28 rounded-lg bg-gradient-to-br from-[#f9b69d] to-[#ff9999] flex items-center justify-center shadow-[0_8px_30px_rgba(249,182,157,0.3)] ring-2 ring-white/50">
+        <div className="shrink-0 hidden sm:block">
+          <AnimatePresence mode="wait">
+            {currentAlbumArt ? (
+              <motion.div
+                key={currentAlbumArt}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="w-36 h-36 rounded-lg overflow-hidden shadow-[0_8px_30px_rgba(249,182,157,0.3)] ring-2 ring-white/50"
+              >
+                <img
+                  src={currentAlbumArt}
+                  alt={currentTrack?.title || 'Album cover'}
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="w-28 h-28 rounded-lg bg-linear-to-br from-[#f9b69d] to-[#ff9999] flex items-center justify-center shadow-[0_8px_30px_rgba(249,182,157,0.3)] ring-2 ring-white/50"
+              >
               <svg
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 className="w-14 h-14 text-white/60"
+                aria-label="Music note"
               >
+                <title>Music note</title>
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
               </svg>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
 
         {/* Contenedor de controles y progreso */}
         <div className="flex-1 flex flex-col gap-3">
           {/* Información del track actual */}
           <div className="text-left min-h-10">
-            {currentTrack ? (
-              <>
-                <div className="text-xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] mb-0.5 truncate">{currentTrack.title}</div>
-                {currentTrack.artist && <div className="text-sm text-[#d4725c] font-normal truncate">{currentTrack.artist}</div>}
-              </>
-            ) : (
-              <div className="text-sm text-[#d4725c]/60 py-2 font-light">{t('noTrackSelected')}</div>
-            )}
+            <AnimatePresence mode="wait">
+              {currentTrack ? (
+                <motion.div
+                  key={currentTrack.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <div className="text-xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] mb-0.5 truncate">{currentTrack.title}</div>
+                  {currentTrack.artist && <div className="text-sm text-[#d4725c] font-normal truncate">{currentTrack.artist}</div>}
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="text-sm text-[#d4725c]/60 py-2 font-light"
+                >
+                  {t('noTrackSelected')}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
       {/* Barra de progreso */}
@@ -245,7 +283,7 @@ export default function PlayerControls({
       <audio ref={audioRef}>
         <track kind="captions" />
       </audio>
-    </div>
+    </motion.div>
   );
 }
 

@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import type { Track, Playlist, PlayerState } from "../types/music";
 import {
 	parseM3U8,
 	readTextFile,
 	calculateTotalDuration,
 } from "../utils/m3u8Parser";
-import { extractEmbeddedCover } from "../utils/coverExtractor";
+import { extractEmbeddedCover, extractAudioMetadata } from "../utils/coverExtractor";
 import {
 	savePlaylist,
 	loadLastPlaylist,
@@ -352,6 +353,24 @@ export default function MusicPlayer() {
 				if (audioFile) {
 					const url = URL.createObjectURL(audioFile);
 					audioMap.set(track.fileName, url);
+
+					// Extraer metadatos de audio (título, artista, etc.)
+					const metadata = await extractAudioMetadata(audioFile);
+					if (metadata) {
+						// Actualizar título y artista si están disponibles en los metadatos
+						if (metadata.title) {
+							track.title = metadata.title;
+							console.log(
+								`🎵 Título extraído de metadatos: "${metadata.title}" para "${track.fileName}"`,
+							);
+						}
+						if (metadata.artist) {
+							track.artist = metadata.artist;
+							console.log(
+								`🎤 Artista extraído de metadatos: "${metadata.artist}" para "${track.fileName}"`,
+							);
+						}
+					}
 
 					// Extraer cover embebido del archivo MP3
 					const embeddedCover = await extractEmbeddedCover(audioFile);
@@ -707,7 +726,12 @@ export default function MusicPlayer() {
 	return (
 		<>
 
-			<div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-12 gap-4 sm:gap-6 animate-[fadeIn_0.6s_ease-out] relative z-10 min-h-0">
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.6, ease: "easeOut" }}
+				className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-12 gap-4 sm:gap-6 relative z-10 min-h-0"
+			>
 				{/* Mensaje de carga desde storage */}
 				{isLoadingStorage && (
 					<div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-xl px-6 py-3 rounded-full shadow-lg border border-[#fce5e8]/40 animate-[fadeIn_0.3s_ease-out]">
@@ -907,7 +931,7 @@ export default function MusicPlayer() {
 					audioRef={audioRef}
 				/>
 			)}
-			</div>
+			</motion.div>
 
 			{/* Modal de playlists guardadas */}
 			{showSavedPlaylists && (

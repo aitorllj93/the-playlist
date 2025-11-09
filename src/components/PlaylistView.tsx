@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import type { Track } from '../types/music';
 import { formatTime } from '../utils/m3u8Parser';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -96,7 +97,11 @@ export default function PlaylistView({
     >
       {/* Header de la playlist - solo cuando hay tracks */}
       {tracks.length > 0 && (
-        <div className={`sticky top-0 z-10 bg-white/95 backdrop-blur-2xl border-b border-[#f9b69d]/10 rounded-t-3xl transition-all duration-300 ${
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className={`sticky top-0 z-10 bg-white/95 backdrop-blur-2xl border-b border-[#f9b69d]/10 rounded-t-3xl transition-all duration-300 ${
           isScrolled
             ? 'px-8 sm:px-10 py-4'
             : 'px-8 sm:px-10 pt-8 sm:pt-10 pb-6'
@@ -140,18 +145,26 @@ export default function PlaylistView({
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Lista de tracks */}
       <div className={`flex flex-col ${tracks.length === 0 ? 'flex-1 justify-center p-8 sm:p-10' : 'gap-1.5 px-8 sm:px-10 py-6'}`}>
         {tracks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-8 py-16 px-8 text-[#8a4a3e] max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center justify-center gap-8 py-16 px-8 text-[#8a4a3e] max-w-2xl mx-auto"
+          >
             <div className="text-center space-y-6">
-              <img
+              <motion.img
                 src={ilustration}
                 alt="Music illustration"
-                className="w-64 h-64 mx-auto mb-4 opacity-90"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 0.9, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="w-64 h-64 mx-auto mb-4"
               />
               <h2 className="text-3xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0">
                 {t('emptyStateTitle')}
@@ -182,11 +195,11 @@ export default function PlaylistView({
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
         ) : (
           <>
             {tracks.map((track, index) => (
-            <button
+            <motion.button
               type="button"
               key={track.id}
               ref={(el) => {
@@ -195,6 +208,14 @@ export default function PlaylistView({
                 } else {
                   trackRefs.current.delete(index);
                 }
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                duration: 0.4,
+                delay: index * 0.05,
+                ease: [0.16, 1, 0.3, 1]
               }}
               className={`flex items-center gap-5 px-5 py-4 rounded-2xl cursor-pointer transition-all text-left w-full group ${
                 index === currentTrackIndex
@@ -239,7 +260,7 @@ export default function PlaylistView({
               <div className="text-[#b85e4f] text-sm font-medium">
                 {formatTime(track.duration)}
               </div>
-            </button>
+            </motion.button>
             ))}
             {/* Espaciador para evitar que el reproductor tape las últimas canciones */}
             <div className="h-32" aria-hidden="true" />
