@@ -558,20 +558,21 @@ export default function MusicPlayer() {
 					/>
 				</div>
 
-				{/* Contenedor principal */}
-				<div className="flex flex-col gap-6 flex-1">
-					{/* Vista de la playlist */}
-					<PlaylistView
-						tracks={playlist.tracks}
-						currentTrackIndex={playerState.currentTrackIndex}
-						onTrackSelect={handleTrackSelect}
-						playlistName={playlist.name}
-						totalDuration={playlist.totalDuration}
-						currentPlaylistTime={currentPlaylistTime}
-					/>
-				</div>
+			{/* Contenedor principal */}
+			<div className="flex flex-col gap-6 flex-1">
+				{/* Vista de la playlist */}
+				<PlaylistView
+					tracks={playlist.tracks}
+					currentTrackIndex={playerState.currentTrackIndex}
+					onTrackSelect={handleTrackSelect}
+					playlistName={playlist.name}
+					totalDuration={playlist.totalDuration}
+					currentPlaylistTime={currentPlaylistTime}
+				/>
+			</div>
 
-				{/* Controles del reproductor - flotante */}
+			{/* Controles del reproductor - flotante (solo cuando hay tracks) */}
+			{playlist.tracks.length > 0 && (
 				<PlayerControls
 					currentTrack={currentTrack}
 					currentAlbumArt={currentAlbumArt}
@@ -590,6 +591,7 @@ export default function MusicPlayer() {
 					onShuffleChange={handleShuffleChange}
 					audioRef={audioRef}
 				/>
+			)}
 			</div>
 		</>
 	);
