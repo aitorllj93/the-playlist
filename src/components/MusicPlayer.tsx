@@ -48,6 +48,7 @@ export default function MusicPlayer() {
 		null,
 	);
 	const [showSavedPlaylists, setShowSavedPlaylists] = useState(false);
+	const [playlistGroups, setPlaylistGroups] = useState<Map<number, string>>(new Map());
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -273,7 +274,8 @@ export default function MusicPlayer() {
 				"📂 Archivos en la carpeta:",
 				fileList.map((f) => `${f.name} (${f.type})`),
 			);
-			const parsedTracks = parseM3U8(content, "");
+			const { tracks: parsedTracks, groups } = parseM3U8(content, "", true);
+			setPlaylistGroups(groups);
 
 			// Crear URLs para los archivos de audio y las imágenes del álbum
 			const audioMap = new Map<string, string>();
@@ -907,6 +909,7 @@ export default function MusicPlayer() {
 					totalDuration={playlist.totalDuration}
 					currentPlaylistTime={currentPlaylistTime}
 					isPlaying={playerState.isPlaying}
+					groups={playlistGroups}
 				/>
 			</div>
 

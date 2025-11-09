@@ -74,6 +74,7 @@ Optional Properties:
 #EXTALB:Playlist Name
 #EXTIMG:./thumbnail.jpg
 #EXTVLCOPT:arturl=./thumbnail.jpg
+#EXTGRP:Oberture
 ```
 
 ## Controls

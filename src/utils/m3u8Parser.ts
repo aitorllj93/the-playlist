@@ -7,20 +7,37 @@ export interface M3U8Info {
   albumArt?: string;
 }
 
+export interface M3U8ParseResult {
+  tracks: Track[];
+  groups: Map<number, string>; // Map de índice de track -> nombre de grupo
+}
+
 /**
- * Parsea el contenido de un archivo m3u8/m3u y retorna una lista de tracks
+ * Parsea el contenido de un archivo m3u8/m3u y retorna una lista de tracks y grupos
  */
-export function parseM3U8(content: string, _: string): Track[] {
+export function parseM3U8(content: string, _: string): Track[];
+export function parseM3U8(content: string, _: string, includeGroups: true): M3U8ParseResult;
+export function parseM3U8(content: string, _: string, includeGroups?: boolean): Track[] | M3U8ParseResult {
   const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   const tracks: Track[] = [];
+  const groups = new Map<number, string>();
   let currentInfo: M3U8Info = {};
   let currentAlbumArt: string | undefined; // Album art persiste para todo el álbum
+  let currentGroup: string | undefined; // Grupo actual
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
     // Saltar el header #EXTM3U
     if (line === '#EXTM3U') {
+      continue;
+    }
+
+    // Parsear grupo #EXTGRP:Nombre del Grupo
+    if (line.startsWith('#EXTGRP:')) {
+      const groupName = line.substring(8).trim(); // Remover '#EXTGRP:'
+      currentGroup = groupName;
+      console.log(`📁 Grupo detectado: "${currentGroup}"`);
       continue;
     }
 
@@ -60,6 +77,13 @@ export function parseM3U8(content: string, _: string): Track[] {
       const fileName = line.split('/').pop() || line;
       const title = currentInfo.title || fileName.replace(/\.(mp3|wav|ogg|m4a|flac)$/i, '');
 
+      // Si hay un grupo actual, guardarlo para este track
+      if (currentGroup) {
+        groups.set(tracks.length, currentGroup);
+        console.log(`📁 Asignando grupo "${currentGroup}" al track #${tracks.length}: "${title}"`);
+        currentGroup = undefined; // Reset del grupo después de asignarlo
+      }
+
       const track = {
         id: `${Date.now()}-${i}`,
         title: title,
@@ -78,6 +102,9 @@ export function parseM3U8(content: string, _: string): Track[] {
     }
   }
 
+  if (includeGroups) {
+    return { tracks, groups };
+  }
   return tracks;
 }
 

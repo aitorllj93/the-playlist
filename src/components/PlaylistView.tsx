@@ -13,6 +13,7 @@ interface PlaylistViewProps {
   totalDuration: number;
   currentPlaylistTime: number;
   isPlaying: boolean;
+  groups?: Map<number, string>;
 }
 
 export default function PlaylistView({
@@ -22,7 +23,8 @@ export default function PlaylistView({
   playlistName,
   totalDuration,
   currentPlaylistTime,
-  isPlaying
+  isPlaying,
+  groups
 }: PlaylistViewProps) {
   const { t } = useLanguage();
   const totalProgress = totalDuration > 0 ? (currentPlaylistTime / totalDuration) * 100 : 0;
@@ -199,31 +201,52 @@ export default function PlaylistView({
         ) : (
           <>
             {tracks.map((track, index) => (
-            <motion.button
-              type="button"
-              key={track.id}
-              ref={(el) => {
-                if (el) {
-                  trackRefs.current.set(index, el);
-                } else {
-                  trackRefs.current.delete(index);
-                }
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{
-                duration: 0.4,
-                delay: index * 0.05,
-                ease: [0.16, 1, 0.3, 1]
-              }}
-              className={`flex items-center gap-5 px-5 py-4 rounded-2xl cursor-pointer transition-all text-left w-full group ${
-                index === currentTrackIndex
-                  ? 'bg-linear-to-r from-[#fce5e8]/60 to-[#fef0e8]/60 shadow-sm'
-                  : 'hover:bg-white/50'
-              }`}
-              onClick={() => onTrackSelect(index)}
-            >
+            <div key={track.id}>
+              {/* Separador de grupo */}
+              {groups?.has(index) && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.05,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  className="flex items-center gap-3 px-5 py-3 mt-4 mb-2"
+                >
+                  <div className="h-px flex-1 bg-linear-to-r from-transparent via-[#f9b69d]/30 to-transparent" />
+                  <span className="text-sm font-medium text-[#d4725c] tracking-wide uppercase">
+                    {groups.get(index)}
+                  </span>
+                  <div className="h-px flex-1 bg-linear-to-r from-transparent via-[#f9b69d]/30 to-transparent" />
+                </motion.div>
+              )}
+
+              {/* Track */}
+              <motion.button
+                type="button"
+                ref={(el) => {
+                  if (el) {
+                    trackRefs.current.set(index, el);
+                  } else {
+                    trackRefs.current.delete(index);
+                  }
+                }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{
+                  duration: 0.4,
+                  delay: index * 0.05,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
+                className={`flex items-center gap-5 px-5 py-4 rounded-2xl cursor-pointer transition-all text-left w-full group ${
+                  index === currentTrackIndex
+                    ? 'bg-linear-to-r from-[#fce5e8]/60 to-[#fef0e8]/60 shadow-sm'
+                    : 'hover:bg-white/50'
+                }`}
+                onClick={() => onTrackSelect(index)}
+              >
               <div className="w-8 flex items-center justify-center text-[#b85e4f] font-medium text-sm">
                 {index === currentTrackIndex ? (
                   isPlaying ? (
@@ -261,6 +284,7 @@ export default function PlaylistView({
                 {formatTime(track.duration)}
               </div>
             </motion.button>
+            </div>
             ))}
             {/* Espaciador para evitar que el reproductor tape las últimas canciones */}
             <div className="h-32" aria-hidden="true" />

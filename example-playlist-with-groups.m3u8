@@ -1,0 +1,18 @@
+#EXTM3U
+
+#EXTGRP:Rock Clásico
+#EXTINF:180,Led Zeppelin - Stairway to Heaven
+cancion1.mp3
+#EXTINF:240,Queen - Bohemian Rhapsody
+cancion2.mp3
+
+#EXTGRP:Pop Moderno
+#EXTINF:200,Dua Lipa - Levitating
+cancion3.mp3
+#EXTINF:220,The Weeknd - Blinding Lights
+cancion4.mp3
+
+#EXTGRP:Jazz
+#EXTINF:195,Miles Davis - So What
+cancion5.mp3
+
