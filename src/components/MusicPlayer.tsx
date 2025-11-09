@@ -420,8 +420,8 @@ export default function MusicPlayer() {
 
 	return (
 		<>
-			{/* Fondo con imagen del álbum */}
-			{currentAlbumArt && (
+			{/* Fondo con imagen del álbum - OCULTO (funcionalidad mantenida) */}
+			{false && currentAlbumArt && (
 				<div
 					key={currentAlbumArt}
 					className="fixed inset-0 z-0 transition-all duration-1000 ease-in-out animate-[fadeIn_1s_ease-out]"
