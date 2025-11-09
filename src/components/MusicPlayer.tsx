@@ -40,31 +40,55 @@ export default function MusicPlayer() {
 
 	// Cargar archivo de audio cuando cambia el track
 	useEffect(() => {
-		if (audioRef.current && playlist.tracks.length > 0) {
-			const currentTrack = playlist.tracks[playerState.currentTrackIndex];
-			const audioUrl = audioFiles.get(currentTrack.fileName);
+		const audio = audioRef.current;
+		if (!audio || playlist.tracks.length === 0) return;
 
-			if (audioUrl && audioRef.current.src !== audioUrl) {
-				audioRef.current.src = audioUrl;
+		const currentTrack = playlist.tracks[playerState.currentTrackIndex];
+		const audioUrl = audioFiles.get(currentTrack.fileName);
+
+		if (!audioUrl) return;
+
+		// Solo cambiar src si es diferente
+		if (audio.src !== audioUrl) {
+			audio.src = audioUrl;
+			audio.load(); // Forzar la carga del nuevo archivo
+
+			// Si debería estar reproduciéndose, reproducir cuando esté listo
+			if (playerState.isPlaying) {
+				const playWhenReady = () => {
+					audio.play().catch((err) => {
+						console.error(t("errorPlaying"), err);
+						setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+					});
+				};
+
+				// Intentar reproducir cuando haya suficientes datos
+				audio.addEventListener("canplay", playWhenReady, { once: true });
 			}
 		}
 	}, [
 		playerState.currentTrackIndex,
 		audioFiles,
 		playlist.tracks,
+		playerState.isPlaying,
+		t,
 	]);
 
 	// Manejar play/pause sin reiniciar el audio
 	useEffect(() => {
-		if (audioRef.current && playlist.tracks.length > 0) {
-			if (playerState.isPlaying) {
-				audioRef.current.play().catch((err) => {
+		const audio = audioRef.current;
+		if (!audio || playlist.tracks.length === 0) return;
+
+		if (playerState.isPlaying) {
+			// Verificar si el audio está listo para reproducir
+			if (audio.readyState >= 2) { // HAVE_CURRENT_DATA o superior
+				audio.play().catch((err) => {
 					console.error(t("errorPlaying"), err);
 					setPlayerState((prev) => ({ ...prev, isPlaying: false }));
 				});
-			} else {
-				audioRef.current.pause();
 			}
+		} else {
+			audio.pause();
 		}
 	}, [playerState.isPlaying, playlist.tracks.length, t]);
 
@@ -103,6 +127,8 @@ export default function MusicPlayer() {
 			...prev,
 			currentTrackIndex: nextIndex,
 			currentTime: 0,
+			// Mantener el estado de reproducción
+			isPlaying: prev.isPlaying,
 		}));
 	}, [
 		playlist.tracks.length,
@@ -333,21 +359,21 @@ export default function MusicPlayer() {
 		}
 	};
 
-	const handlePlay = () => {
+	const handlePlay = useCallback(() => {
 		if (audioRef.current && playlist.tracks.length > 0) {
 			audioRef.current.play();
 			setPlayerState((prev) => ({ ...prev, isPlaying: true }));
 		}
-	};
+	}, [playlist.tracks.length]);
 
-	const handlePause = () => {
+	const handlePause = useCallback(() => {
 		if (audioRef.current) {
 			audioRef.current.pause();
 			setPlayerState((prev) => ({ ...prev, isPlaying: false }));
 		}
-	};
+	}, []);
 
-	const handlePrevious = () => {
+	const handlePrevious = useCallback(() => {
 		if (playlist.tracks.length === 0) return;
 
 		// Si estamos a más de 3 segundos, reiniciar la canción actual
@@ -377,15 +403,23 @@ export default function MusicPlayer() {
 			...prev,
 			currentTrackIndex: prevIndex,
 			currentTime: 0,
+			// Mantener el estado de reproducción
+			isPlaying: prev.isPlaying,
 		}));
-	};
+	}, [
+		playlist.tracks.length,
+		playerState.currentTime,
+		playerState.shuffle,
+		playerState.repeat,
+		playerState.currentTrackIndex,
+	]);
 
-	const handleSeek = (time: number) => {
+	const handleSeek = useCallback((time: number) => {
 		if (audioRef.current) {
 			audioRef.current.currentTime = time;
 			setPlayerState((prev) => ({ ...prev, currentTime: time }));
 		}
-	};
+	}, []);
 
 	const handleVolumeChange = (volume: number) => {
 		if (audioRef.current) {
@@ -429,6 +463,98 @@ export default function MusicPlayer() {
 		Array.from(albumArtUrls.keys()),
 	);
 	console.log("   - Album Art URL encontrada:", currentAlbumArt || "NINGUNA");
+
+	// Integración con Media Session API para controles del teclado
+	useEffect(() => {
+		if ("mediaSession" in navigator && currentTrack) {
+			// Actualizar metadatos
+			navigator.mediaSession.metadata = new MediaMetadata({
+				title: currentTrack.title,
+				artist: currentTrack.artist || "Unknown Artist",
+				album: playlist.name || "Unknown Album",
+				artwork: currentAlbumArt
+					? [
+							{
+								src: currentAlbumArt,
+								sizes: "512x512",
+								type: "image/jpeg",
+							},
+					  ]
+					: [],
+			});
+
+			// Registrar handlers para las acciones de medios
+			navigator.mediaSession.setActionHandler("play", () => {
+				handlePlay();
+			});
+
+			navigator.mediaSession.setActionHandler("pause", () => {
+				handlePause();
+			});
+
+			navigator.mediaSession.setActionHandler("previoustrack", () => {
+				handlePrevious();
+			});
+
+			navigator.mediaSession.setActionHandler("nexttrack", () => {
+				handleNext();
+			});
+
+			navigator.mediaSession.setActionHandler("seekto", (details) => {
+				if (details.seekTime !== undefined) {
+					handleSeek(details.seekTime);
+				}
+			});
+
+			navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+				const skipTime = details.seekOffset || 10;
+				if (audioRef.current) {
+					handleSeek(Math.max(0, audioRef.current.currentTime - skipTime));
+				}
+			});
+
+			navigator.mediaSession.setActionHandler("seekforward", (details) => {
+				const skipTime = details.seekOffset || 10;
+				if (audioRef.current && currentTrack) {
+					handleSeek(
+						Math.min(currentTrack.duration, audioRef.current.currentTime + skipTime)
+					);
+				}
+			});
+
+			// Actualizar el estado de posición
+			if (audioRef.current && currentTrack.duration) {
+				navigator.mediaSession.setPositionState({
+					duration: currentTrack.duration,
+					playbackRate: audioRef.current.playbackRate,
+					position: playerState.currentTime,
+				});
+			}
+		}
+
+		return () => {
+			// Limpiar handlers al desmontar
+			if ("mediaSession" in navigator) {
+				navigator.mediaSession.setActionHandler("play", null);
+				navigator.mediaSession.setActionHandler("pause", null);
+				navigator.mediaSession.setActionHandler("previoustrack", null);
+				navigator.mediaSession.setActionHandler("nexttrack", null);
+				navigator.mediaSession.setActionHandler("seekto", null);
+				navigator.mediaSession.setActionHandler("seekbackward", null);
+				navigator.mediaSession.setActionHandler("seekforward", null);
+			}
+		};
+	}, [
+		currentTrack,
+		currentAlbumArt,
+		playerState.currentTime,
+		playlist.name,
+		handlePlay,
+		handlePause,
+		handlePrevious,
+		handleNext,
+		handleSeek,
+	]);
 
 	return (
 		<>
