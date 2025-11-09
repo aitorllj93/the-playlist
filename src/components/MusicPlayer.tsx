@@ -25,6 +25,7 @@ export default function MusicPlayer() {
   });
 
   const [audioFiles, setAudioFiles] = useState<Map<string, string>>(new Map());
+  const [albumArtUrls, setAlbumArtUrls] = useState<Map<string, string>>(new Map());
   const [currentPlaylistTime, setCurrentPlaylistTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -130,11 +131,54 @@ export default function MusicPlayer() {
     try {
       // Leer y parsear el archivo m3u8
       const content = await readTextFile(m3u8File);
+      console.log('📂 Archivos en la carpeta:', fileList.map(f => `${f.name} (${f.type})`));
       const parsedTracks = parseM3U8(content, '');
 
-      // Crear URLs para los archivos de audio
+      // Crear URLs para los archivos de audio y las imágenes del álbum
       const audioMap = new Map<string, string>();
+      const artMap = new Map<string, string>();
+      const loadedAlbumArts = new Map<string, string>(); // Cache de imágenes ya cargadas
       const tracksWithDuration: Track[] = [];
+
+      // Primero, cargar todas las imágenes únicas
+      const uniqueAlbumArts = new Set(parsedTracks.map(t => t.albumArt).filter(Boolean));
+
+      console.log('🔍 Imágenes a buscar:', Array.from(uniqueAlbumArts));
+      console.log('🖼️ Archivos de imagen en la carpeta:', fileList.filter(f =>
+        f.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(f.name)
+      ).map(f => `${f.name} (${f.type || 'sin tipo'})`));
+
+      for (const albumArtPath of uniqueAlbumArts) {
+        if (albumArtPath) {
+          const albumArtFileName = albumArtPath.split('/').pop() || albumArtPath;
+          console.log(`🔎 Buscando: "${albumArtFileName}"`);
+
+          // Búsqueda más flexible
+          const albumArtFile = fileList.find(file => {
+            const match =
+              file.name === albumArtFileName ||
+              file.name.toLowerCase() === albumArtFileName.toLowerCase() ||
+              // Buscar por extensión de imagen si el archivo es una imagen
+              (file.type.startsWith('image/') && file.name.toLowerCase() === albumArtFileName.toLowerCase()) ||
+              // Buscar archivos de imagen aunque no tengan el tipo MIME correcto
+              (/\.(jpg|jpeg|png|gif|webp)$/i.test(file.name) && file.name.toLowerCase() === albumArtFileName.toLowerCase());
+
+            if (match) {
+              console.log(`   ✓ Encontrado: ${file.name} (${file.type || 'sin tipo'})`);
+            }
+            return match;
+          });
+
+          if (albumArtFile) {
+            const artUrl = URL.createObjectURL(albumArtFile);
+            loadedAlbumArts.set(albumArtPath, artUrl);
+            console.log(`✓ Imagen cargada exitosamente: ${albumArtFileName} → ${artUrl.substring(0, 50)}...`);
+          } else {
+            console.error(`✗ No se encontró la imagen: ${albumArtFileName}`);
+            console.error('   Archivos disponibles:', fileList.map(f => f.name).join(', '));
+          }
+        }
+      }
 
       for (const track of parsedTracks) {
         // Buscar el archivo de audio correspondiente
@@ -146,6 +190,17 @@ export default function MusicPlayer() {
         if (audioFile) {
           const url = URL.createObjectURL(audioFile);
           audioMap.set(track.fileName, url);
+
+          // Asociar la imagen del álbum con este track si existe
+          if (track.albumArt && loadedAlbumArts.has(track.albumArt)) {
+            const artUrl = loadedAlbumArts.get(track.albumArt);
+            if (artUrl) {
+              artMap.set(track.fileName, artUrl);
+              console.log(`🔗 Asociando imagen al track: "${track.fileName}" → ${artUrl.substring(0, 50)}...`);
+            }
+          } else if (track.albumArt) {
+            console.warn(`⚠️ Track "${track.fileName}" tiene albumArt="${track.albumArt}" pero no está en loadedAlbumArts`);
+          }
 
           // Siempre obtener la duración real del archivo de audio
           // porque las duraciones del m3u8 no son fiables
@@ -174,6 +229,13 @@ export default function MusicPlayer() {
       }
 
       setAudioFiles(audioMap);
+      setAlbumArtUrls(artMap);
+
+      console.log('📊 Resumen de carga:');
+      console.log(`   - Tracks cargados: ${tracksWithDuration.length}`);
+      console.log(`   - Audio URLs: ${audioMap.size}`);
+      console.log(`   - Album Art URLs: ${artMap.size}`);
+      console.log('   - Mapeo de imágenes:', Array.from(artMap.entries()).map(([k, v]) => `"${k}" → ${v.substring(0, 40)}...`));
 
       const totalDuration = calculateTotalDuration(tracksWithDuration);
       setPlaylist({
@@ -276,9 +338,34 @@ export default function MusicPlayer() {
   };
 
   const currentTrack = playlist.tracks[playerState.currentTrackIndex] || null;
+  const currentAlbumArt = currentTrack ? albumArtUrls.get(currentTrack.fileName) : null;
+
+  console.log('🎨 Render - Track actual:', currentTrack?.title);
+  console.log('   - fileName:', currentTrack?.fileName);
+  console.log('   - albumArt en track:', currentTrack?.albumArt);
+  console.log('   - Album Art URLs disponibles:', Array.from(albumArtUrls.keys()));
+  console.log('   - Album Art URL encontrada:', currentAlbumArt || 'NINGUNA');
 
   return (
-    <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-6 sm:p-12 gap-6 pb-64 animate-[fadeIn_0.6s_ease-out]">
+    <>
+      {/* Fondo con imagen del álbum */}
+      {currentAlbumArt && (
+        <div
+          key={currentAlbumArt}
+          className="fixed inset-0 z-0 transition-all duration-1000 ease-in-out animate-[fadeIn_1s_ease-out]"
+          style={{
+            backgroundImage: `url(${currentAlbumArt})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
+          {/* Overlay para oscurecer y dar efecto blur */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl" />
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-6 sm:p-12 gap-6 pb-64 animate-[fadeIn_0.6s_ease-out] relative z-10">
       {/* Header con botón para cargar playlist */}
       <div className="flex justify-between items-center gap-8 mb-2">
         <h1 className="flex items-center gap-3 text-4xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0">
@@ -354,7 +441,8 @@ export default function MusicPlayer() {
         onShuffleChange={handleShuffleChange}
         audioRef={audioRef}
       />
-    </div>
+      </div>
+    </>
   );
 }
 

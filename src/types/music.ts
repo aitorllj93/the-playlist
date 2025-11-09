@@ -5,6 +5,7 @@ export interface Track {
   duration: number; // en segundos
   filePath: string;
   fileName: string;
+  albumArt?: string; // ruta al archivo de imagen del álbum
 }
 
 export interface Playlist {

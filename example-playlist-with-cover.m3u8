@@ -1,0 +1,18 @@
+#EXTM3U
+
+# Álbum 1 - Todas estas canciones compartirán la imagen Motivacion.jpg
+#EXTIMG:./Motivacion.jpg
+#EXTINF:180,Artista Ejemplo 1 - Canción 1 del Álbum
+cancion1.mp3
+#EXTINF:240,Artista Ejemplo 1 - Canción 2 del Álbum
+cancion2.mp3
+#EXTINF:200,Artista Ejemplo 1 - Canción 3 del Álbum
+cancion3.mp3
+
+# Álbum 2 - Cambiamos a otra imagen para el siguiente álbum
+#EXTVLCOPT:arturl=./Inspiracion.jpg
+#EXTINF:220,Artista Ejemplo 2 - Canción 1 del Álbum 2
+cancion4.mp3
+#EXTINF:195,Artista Ejemplo 2 - Canción 2 del Álbum 2
+cancion5.mp3
+
