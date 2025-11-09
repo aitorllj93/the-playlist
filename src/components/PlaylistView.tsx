@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import type { Track } from '../types/music';
 import { formatTime } from '../utils/m3u8Parser';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -22,37 +23,126 @@ export default function PlaylistView({
 }: PlaylistViewProps) {
   const { t } = useLanguage();
   const totalProgress = totalDuration > 0 ? (currentPlaylistTime / totalDuration) * 100 : 0;
+  const [isScrolled, setIsScrolled] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const isTransitioningRef = useRef(false);
+  const trackRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      // No cambiar estado durante transición
+      if (isTransitioningRef.current) return;
+
+      // Cancelar frame anterior si existe
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+
+      // Usar requestAnimationFrame para suavizar
+      rafRef.current = requestAnimationFrame(() => {
+        const scrollTop = container.scrollTop;
+
+        // Umbral claro con histéresis grande
+        const shouldBeScrolled = scrollTop > 100;
+        const shouldBeExpanded = scrollTop < 20;
+
+        if (shouldBeScrolled && !isScrolled) {
+          isTransitioningRef.current = true;
+          setIsScrolled(true);
+          // Dar tiempo a la transición CSS (300ms)
+          setTimeout(() => {
+            isTransitioningRef.current = false;
+          }, 350);
+        } else if (shouldBeExpanded && isScrolled) {
+          isTransitioningRef.current = true;
+          setIsScrolled(false);
+          setTimeout(() => {
+            isTransitioningRef.current = false;
+          }, 350);
+        }
+      });
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [isScrolled]);
+
+  // Hacer scroll a la canción actual cuando cambia
+  useEffect(() => {
+    const currentTrackElement = trackRefs.current.get(currentTrackIndex);
+    if (currentTrackElement && containerRef.current) {
+      currentTrackElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [currentTrackIndex]);
 
   return (
-    <div className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 shadow-[0_8px_32px_rgba(249,182,157,0.2)] border border-white/80 flex flex-col gap-8 flex-1 min-h-0">
+    <div
+      ref={containerRef}
+      className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-[0_8px_32px_rgba(249,182,157,0.2)] border border-white/80 flex flex-col flex-1 min-h-0 overflow-y-auto"
+    >
       {/* Header de la playlist - solo cuando hay tracks */}
       {tracks.length > 0 && (
-        <div className="flex flex-col gap-6">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0 mb-2">{playlistName}</h2>
-            <p className="text-[#d4725c] text-base sm:text-lg font-normal m-0">
-              {tracks.length} {tracks.length === 1 ? t('track') : t('tracks')} • {formatTime(totalDuration)}
-            </p>
-          </div>
-
-          {/* Progreso total de la playlist */}
-          <div className="flex flex-col gap-3">
-            <div className="flex justify-between text-sm text-[#b85e4f] font-medium tracking-wide">
-              <span>{t('totalProgress')}</span>
-              <span>{formatTime(currentPlaylistTime)} / {formatTime(totalDuration)}</span>
+        <div className={`sticky top-0 z-10 bg-white/95 backdrop-blur-2xl border-b border-[#f9b69d]/10 rounded-t-3xl transition-all duration-300 ${
+          isScrolled
+            ? 'px-8 sm:px-10 py-4'
+            : 'px-8 sm:px-10 pt-8 sm:pt-10 pb-6'
+        }`}>
+          <div className={`flex flex-col transition-all duration-300 ${isScrolled ? 'gap-3' : 'gap-6'}`}>
+            <div className={`flex transition-all duration-300 ${isScrolled ? 'flex-row items-center justify-between gap-4' : 'flex-col'}`}>
+              <h2 className={`font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0 transition-all duration-300 ${
+                isScrolled
+                  ? 'text-xl sm:text-2xl'
+                  : 'text-3xl sm:text-4xl mb-2'
+              }`}>
+                {playlistName}
+              </h2>
+              <p className={`text-[#d4725c] font-normal m-0 whitespace-nowrap transition-all duration-300 ${
+                isScrolled
+                  ? 'text-sm sm:text-base'
+                  : 'text-base sm:text-lg'
+              }`}>
+                {tracks.length} {tracks.length === 1 ? t('track') : t('tracks')} • {formatTime(totalDuration)}
+              </p>
             </div>
-            <div className="h-1.5 bg-white/50 rounded-full overflow-hidden backdrop-blur-sm">
-              <div
-                className="h-full bg-linear-to-r from-[#f9b69d] via-[#fec5b2] to-[#ff9999] transition-all duration-300 ease-out rounded-full shadow-[0_0_10px_rgba(249,182,157,0.4)]"
-                style={{ width: `${totalProgress}%` }}
-              />
+
+            {/* Progreso total de la playlist */}
+            <div className="flex flex-col gap-3">
+              {/* Textos de progreso - solo cuando no está scrolled */}
+              {!isScrolled && (
+                <div className="flex justify-between text-sm text-[#b85e4f] font-medium tracking-wide animate-[fadeIn_0.3s_ease-out]">
+                  <span>{t('totalProgress')}</span>
+                  <span>{formatTime(currentPlaylistTime)} / {formatTime(totalDuration)}</span>
+                </div>
+              )}
+
+              {/* Barra de progreso - siempre visible */}
+              <div className={`bg-white/50 rounded-full overflow-hidden backdrop-blur-sm transition-all duration-300 ${
+                isScrolled ? 'h-1' : 'h-1.5'
+              }`}>
+                <div
+                  className="h-full bg-linear-to-r from-[#f9b69d] via-[#fec5b2] to-[#ff9999] transition-all duration-300 ease-out rounded-full shadow-[0_0_10px_rgba(249,182,157,0.4)]"
+                  style={{ width: `${totalProgress}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* Lista de tracks */}
-      <div className={`flex-1 overflow-y-auto flex flex-col ${tracks.length === 0 ? 'justify-center' : 'gap-1.5'}`}>
+      <div className={`flex flex-col ${tracks.length === 0 ? 'flex-1 justify-center p-8 sm:p-10' : 'gap-1.5 px-8 sm:px-10 py-6'}`}>
         {tracks.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-8 py-16 px-8 text-[#8a4a3e] max-w-2xl mx-auto">
             <div className="text-center space-y-6">
@@ -97,6 +187,13 @@ export default function PlaylistView({
             <button
               type="button"
               key={track.id}
+              ref={(el) => {
+                if (el) {
+                  trackRefs.current.set(index, el);
+                } else {
+                  trackRefs.current.delete(index);
+                }
+              }}
               className={`flex items-center gap-5 px-5 py-4 rounded-2xl cursor-pointer transition-all text-left w-full group ${
                 index === currentTrackIndex
                   ? 'bg-linear-to-r from-[#fce5e8]/60 to-[#fef0e8]/60 shadow-sm'
@@ -137,7 +234,7 @@ export default function PlaylistView({
             </button>
             ))}
             {/* Espaciador para evitar que el reproductor tape las últimas canciones */}
-            <div className="h-64" aria-hidden="true" />
+            <div className="h-32" aria-hidden="true" />
           </>
         )}
       </div>

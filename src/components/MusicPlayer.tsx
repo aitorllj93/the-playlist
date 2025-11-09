@@ -46,7 +46,6 @@ export default function MusicPlayer() {
 
 			if (audioUrl) {
 				audioRef.current.src = audioUrl;
-				audioRef.current.volume = playerState.volume;
 
 				if (playerState.isPlaying) {
 					audioRef.current.play().catch((err) => {
@@ -59,11 +58,17 @@ export default function MusicPlayer() {
 	}, [
 		playerState.currentTrackIndex,
 		playerState.isPlaying,
-		playerState.volume,
 		audioFiles,
 		playlist.tracks,
 		t,
 	]);
+
+	// Sincronizar volumen sin reiniciar la reproducción
+	useEffect(() => {
+		if (audioRef.current) {
+			audioRef.current.volume = playerState.volume;
+		}
+	}, [playerState.volume]);
 
 	const handleNext = useCallback(() => {
 		if (playlist.tracks.length === 0) return;
@@ -314,6 +319,7 @@ export default function MusicPlayer() {
 				...prev,
 				currentTrackIndex: 0,
 				currentTime: 0,
+				isPlaying: true,
 			}));
 			setCurrentPlaylistTime(0);
 		} catch (error) {
@@ -421,44 +427,28 @@ export default function MusicPlayer() {
 
 	return (
 		<>
-			{/* Fondo con imagen del álbum - OCULTO (funcionalidad mantenida) */}
-			{false && currentAlbumArt && (
-				<div
-					key={currentAlbumArt}
-					className="fixed inset-0 z-0 transition-all duration-1000 ease-in-out animate-[fadeIn_1s_ease-out]"
-					style={{
-						backgroundImage: `url(${currentAlbumArt})`,
-						backgroundSize: "cover",
-						backgroundPosition: "center",
-						backgroundRepeat: "no-repeat",
-					}}
-				>
-					{/* Overlay para oscurecer y dar efecto blur */}
-					<div className="absolute inset-0 bg-black/70 backdrop-blur-3xl" />
-				</div>
-			)}
 
-			<div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-6 sm:p-12 gap-6 pb-96 animate-[fadeIn_0.6s_ease-out] relative z-10">
+			<div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-12 gap-4 sm:gap-6 animate-[fadeIn_0.6s_ease-out] relative z-10 min-h-0">
 				{/* Header con botón para cargar playlist */}
-				<div className="flex justify-between items-center gap-8 mb-2">
-					<h1 className="flex items-center gap-3 text-5xl font-logo font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0">
+				<div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-6 lg:gap-8 mb-2">
+					<h1 className="flex items-center gap-2 sm:gap-3 text-3xl sm:text-4xl lg:text-5xl font-logo font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0 shrink-0">
 						<img
 							src={logo}
 							alt={t("music")}
-							width="50"
-							height="50"
-							className="inline-block"
+							width="36"
+							height="36"
+							className="inline-block sm:w-[42px] sm:h-[42px] lg:w-[50px] lg:h-[50px]"
 						/>
 						{t("music")}
 					</h1>
 
-					<div className="flex items-center gap-4 relative">
+					<div className="flex items-center gap-2 sm:gap-3 lg:gap-4 relative">
 						<LanguageSelector />
 
 						<div className="relative">
 							<button
 								type="button"
-								className="flex items-center gap-2.5 px-7 py-3.5 bg-white/70 backdrop-blur-xl text-[#d4725c] border border-[#fce5e8]/40 rounded-full font-medium cursor-pointer transition-all hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(249,182,157,0.2)] hover:-translate-y-0.5 active:translate-y-0"
+								className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 lg:px-7 lg:py-3.5 bg-white/70 backdrop-blur-xl text-[#d4725c] border border-[#fce5e8]/40 rounded-full text-sm sm:text-base font-medium cursor-pointer transition-all hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(249,182,157,0.2)] hover:-translate-y-0.5 active:translate-y-0"
 								onClick={() => fileInputRef.current?.click()}
 							>
 								<svg
@@ -468,13 +458,14 @@ export default function MusicPlayer() {
 									strokeWidth="2"
 									strokeLinecap="round"
 									strokeLinejoin="round"
-									className="w-5 h-5"
+									className="w-4 h-4 sm:w-5 sm:h-5"
 									aria-hidden="true"
 								>
 									<title>{t("folder")}</title>
 									<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
 								</svg>
-								{t("selectFolder")}
+								<span className="hidden xs:inline">{t("selectFolder")}</span>
+								<span className="inline xs:hidden">{t("folder")}</span>
 							</button>
 
 							{/* Flecha dibujada a mano señalando el botón cuando no hay playlist */}
@@ -544,7 +535,7 @@ export default function MusicPlayer() {
 				</div>
 
 			{/* Contenedor principal */}
-			<div className="flex flex-col gap-6 flex-1">
+			<div className="flex flex-col gap-6 flex-1 min-h-0">
 				{/* Vista de la playlist */}
 				<PlaylistView
 					tracks={playlist.tracks}
