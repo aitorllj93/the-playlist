@@ -1,6 +1,7 @@
 import type { Track } from '../types/music';
 import { formatTime } from '../utils/m3u8Parser';
 import { useLanguage } from '../i18n/LanguageContext';
+import ilustration from '../assets/ilustration.png';
 
 interface PlaylistViewProps {
   tracks: Track[];
@@ -51,10 +52,15 @@ export default function PlaylistView({
       )}
 
       {/* Lista de tracks */}
-      <div className="flex-1 overflow-y-auto flex flex-col gap-1.5">
+      <div className={`flex-1 overflow-y-auto flex flex-col ${tracks.length === 0 ? 'justify-center' : 'gap-1.5'}`}>
         {tracks.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-8 py-16 px-8 text-[#8a4a3e] max-w-2xl mx-auto">
             <div className="text-center space-y-6">
+              <img
+                src={ilustration}
+                alt="Music illustration"
+                className="w-64 h-64 mx-auto mb-4 opacity-90"
+              />
               <h2 className="text-3xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0">
                 {t('emptyStateTitle')}
               </h2>

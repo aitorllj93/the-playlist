@@ -10,6 +10,7 @@ import PlayerControls from "./PlayerControls";
 import PlaylistView from "./PlaylistView";
 import LanguageSelector from "./LanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
+import logo from "../assets/logo.svg";
 
 export default function MusicPlayer() {
 	const { t } = useLanguage();
@@ -440,30 +441,14 @@ export default function MusicPlayer() {
 			<div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-6 sm:p-12 gap-6 pb-96 animate-[fadeIn_0.6s_ease-out] relative z-10">
 				{/* Header con botón para cargar playlist */}
 				<div className="flex justify-between items-center gap-8 mb-2">
-					<h1 className="flex items-center gap-3 text-4xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
+					<h1 className="flex items-center gap-3 text-5xl font-logo font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0">
+						<img
+							src={logo}
+							alt={t("music")}
 							width="50"
 							height="50"
-							viewBox="0 0 50 50"
-						>
-              <title>{t("music")}</title>
-							<g
-								fill="none"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth="2"
-							>
-								<path
-									stroke="var(--color-her-text-tertiary)"
-									d="M29.167 31.25H43.75zm0 8.333H43.75zm10.666-30.75l-.25.23l-.25-.23a1.686 1.686 0 0 0-2.395 0v0a1.71 1.71 0 0 0 0 2.417l.687.708l1.958 1.959l1.917-1.938l.688-.687a1.73 1.73 0 0 0 0-2.438a1.687 1.687 0 0 0-2.355-.02"
-								/>
-								<path
-									stroke="var(--color-her-coral)"
-									d="M20.833 36.458V6.25zm-7.291-7.291a7.292 7.292 0 1 0 0 14.583a7.292 7.292 0 0 0 0-14.583"
-								/>
-							</g>
-						</svg>
+							className="inline-block"
+						/>
 						{t("music")}
 					</h1>
 
