@@ -21,7 +21,7 @@ Un reproductor de música moderno y completo desarrollado con React, TypeScript 
 git clone <url-del-repositorio>
 
 # Navegar al directorio
-cd music-player
+cd the-playlist
 
 # Instalar dependencias
 pnpm install
@@ -29,6 +29,31 @@ pnpm install
 # Ejecutar en desarrollo
 pnpm run dev
 ```
+
+## 🌐 Despliegue en GitHub Pages
+
+Este proyecto está configurado para desplegarse automáticamente en GitHub Pages mediante GitHub Actions. Para activarlo:
+
+1. **Sube el código a GitHub**:
+```bash
+git add .
+git commit -m "Configurar GitHub Pages"
+git push origin main
+```
+
+2. **Activa GitHub Pages en tu repositorio**:
+   - Ve a **Settings** (Configuración) de tu repositorio
+   - En el menú lateral, selecciona **Pages**
+   - En **Source** (Fuente), selecciona **GitHub Actions**
+
+3. **El despliegue se ejecutará automáticamente** cada vez que hagas push a la rama `main`
+
+4. **Accede a tu aplicación** en: `https://tu-usuario.github.io/the-playlist/`
+
+El workflow de GitHub Actions se encuentra en `.github/workflows/deploy.yml` y se encarga de:
+- Instalar las dependencias con pnpm
+- Construir el proyecto
+- Desplegarlo en GitHub Pages
 
 ## 📖 Cómo usar
 
@@ -72,7 +97,7 @@ cancion2.mp3
 ## 📝 Estructura del proyecto
 
 ```
-music-player/
+the-playlist/
 ├── src/
 │   ├── components/
 │   │   ├── MusicPlayer.tsx      # Componente principal
