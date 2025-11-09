@@ -382,20 +382,73 @@ export default function MusicPlayer() {
           {t('music')}
         </h1>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 relative">
           <LanguageSelector />
 
-          <button
-            type="button"
-            className="flex items-center gap-2.5 px-7 py-3.5 bg-white/70 backdrop-blur-xl text-[#f9b69d] border border-[#fce5e8]/40 rounded-full font-medium cursor-pointer transition-all hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(249,182,157,0.2)] hover:-translate-y-0.5 active:translate-y-0"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-              <title>{t('folder')}</title>
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-            </svg>
-            {t('selectFolder')}
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              className="flex items-center gap-2.5 px-7 py-3.5 bg-white/70 backdrop-blur-xl text-[#d4725c] border border-[#fce5e8]/40 rounded-full font-medium cursor-pointer transition-all hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(249,182,157,0.2)] hover:-translate-y-0.5 active:translate-y-0"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+                <title>{t('folder')}</title>
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              {t('selectFolder')}
+            </button>
+
+            {/* Flecha dibujada a mano señalando el botón cuando no hay playlist */}
+            {playlist.tracks.length === 0 && (
+              <div className="z-10 absolute top-full left-1/2 -translate-x-1/2 mt-2 pointer-events-none animate-[bounce_2s_ease-in-out_infinite]">
+                <svg
+                  width="140"
+                  height="100"
+                  viewBox="0 0 140 100"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="text-[#f9b69d] opacity-90"
+                  aria-hidden="true"
+                >
+                  <title>{t('clickHere')}</title>
+                  {/* Flecha curva dibujada a mano - apuntando hacia arriba al botón */}
+                  <path
+                    d="M 20 80 Q 35 50, 60 20 Q 68 10, 75 8"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                    style={{
+                      filter: 'drop-shadow(0 2px 8px rgba(249, 182, 157, 0.4))'
+                    }}
+                  />
+                  {/* Punta de la flecha */}
+                  <path
+                    d="M 75 8 L 68 6 M 75 8 L 72 15"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Texto de ayuda */}
+                  <text
+                    x="5"
+                    y="95"
+                    fill="currentColor"
+                    fontSize="15"
+                    fontWeight="600"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                    style={{
+                      filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3))'
+                    }}
+                  >
+                    {t('clickHere') || '¡Empieza aquí!'}
+                  </text>
+                </svg>
+              </div>
+            )}
+          </div>
         </div>
 
         <input

@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     // Main header
-    music: 'Music',
+    music: 'The Playlist',
     selectFolder: 'Select Folder',
 
     // Alerts and messages
@@ -31,11 +31,12 @@ export const translations = {
 
     // Accessibility
     folder: 'Folder',
-    noTracks: 'No tracks'
+    noTracks: 'No tracks',
+    clickHere: 'Start here!'
   },
   es: {
     // Encabezado principal
-    music: 'Música',
+    music: 'La Lista',
     selectFolder: 'Seleccionar Carpeta',
 
     // Alertas y mensajes
@@ -65,7 +66,8 @@ export const translations = {
 
     // Accesibilidad
     folder: 'Carpeta',
-    noTracks: 'Sin pistas'
+    noTracks: 'Sin pistas',
+    clickHere: '¡Empieza aquí!'
   }
 } as const;
 
