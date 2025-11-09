@@ -2,6 +2,8 @@
 
 Finally, an m3u8 player that shows you where you are.
 
+![Screenshot](https://raw.githubusercontent.com/aitorllj93/the-playlist/refs/heads/main/Screenshot.jpg)
+
 ## What it does
 
 The Playlist transforms how you experience your music collections. Load a folder, see your progress, feel the flow.
