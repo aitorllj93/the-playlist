@@ -1,8 +1,9 @@
+
+![Title](https://raw.githubusercontent.com/aitorllj93/the-playlist/refs/heads/main/Title.jpg)
+
 # [The Playlist](http://aitorllamas.com/the-playlist/)
 
 Finally, an m3u8 player that shows you where you are.
-
-![Screenshot](https://raw.githubusercontent.com/aitorllj93/the-playlist/refs/heads/main/Screenshot.jpg)
 
 ## What it does
 
@@ -14,6 +15,8 @@ The Playlist transforms how you experience your music collections. Load a folder
 - Seamless playback controls
 - Shuffle and repeat modes
 - Clean, responsive interface
+
+![Screenshot](https://raw.githubusercontent.com/aitorllj93/the-playlist/refs/heads/main/Screenshot.jpg)
 
 ## Getting started
 
