@@ -1,5 +1,6 @@
 import type { Track } from '../types/music';
 import { formatTime } from '../utils/m3u8Parser';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface PlaylistViewProps {
   tracks: Track[];
@@ -18,6 +19,7 @@ export default function PlaylistView({
   totalDuration,
   currentPlaylistTime
 }: PlaylistViewProps) {
+  const { t } = useLanguage();
   const totalProgress = totalDuration > 0 ? (currentPlaylistTime / totalDuration) * 100 : 0;
 
   return (
@@ -26,15 +28,15 @@ export default function PlaylistView({
       <div className="flex flex-col gap-6">
         <div>
           <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0 mb-2">{playlistName}</h2>
-          <p className="text-[#f9b69d]/70 text-base sm:text-lg font-light m-0">
-            {tracks.length} {tracks.length === 1 ? 'pista' : 'pistas'} • {formatTime(totalDuration)}
+          <p className="text-[#d4725c] text-base sm:text-lg font-normal m-0">
+            {tracks.length} {tracks.length === 1 ? t('track') : t('tracks')} • {formatTime(totalDuration)}
           </p>
         </div>
 
         {/* Progreso total de la playlist */}
         <div className="flex flex-col gap-3">
-          <div className="flex justify-between text-sm text-[#f9b69d]/70 font-light tracking-wide">
-            <span>Progreso total</span>
+          <div className="flex justify-between text-sm text-[#b85e4f] font-medium tracking-wide">
+            <span>{t('totalProgress')}</span>
             <span>{formatTime(currentPlaylistTime)} / {formatTime(totalDuration)}</span>
           </div>
           <div className="h-1.5 bg-white/50 rounded-full overflow-hidden backdrop-blur-sm">
@@ -49,14 +51,14 @@ export default function PlaylistView({
       {/* Lista de tracks */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-1.5">
         {tracks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-5 py-20 px-8 text-[#f9b69d]/40 text-center">
+          <div className="flex flex-col items-center justify-center gap-5 py-20 px-8 text-[#d4725c]/70 text-center">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-20 h-20" aria-hidden="true">
-              <title>Sin pistas</title>
+              <title>{t('noTracks')}</title>
               <circle cx="12" cy="12" r="10"/>
               <path d="M9 9h6M9 15h6"/>
             </svg>
-            <p className="m-0 text-lg font-light">No hay pistas en la playlist</p>
-            <p className="m-0 text-sm text-[#f9b69d]/30 font-light">Selecciona una carpeta con un archivo m3u8</p>
+            <p className="m-0 text-lg font-normal">{t('noTracksInPlaylist')}</p>
+            <p className="m-0 text-sm text-[#d4725c]/60 font-light">{t('selectFolderWithM3u8')}</p>
           </div>
         ) : (
           tracks.map((track, index) => (
@@ -70,7 +72,7 @@ export default function PlaylistView({
               }`}
               onClick={() => onTrackSelect(index)}
             >
-              <div className="w-8 flex items-center justify-center text-[#f9b69d]/60 font-light text-sm">
+              <div className="w-8 flex items-center justify-center text-[#b85e4f] font-medium text-sm">
                 {index === currentTrackIndex ? (
                   <div className="flex gap-1 items-center h-5">
                     <span className="w-0.5 bg-linear-to-t from-[#f9b69d] to-[#ff9999] rounded-full animate-[playing_0.8s_ease-in-out_infinite]" />
@@ -86,18 +88,18 @@ export default function PlaylistView({
                 <div className={`font-normal overflow-hidden text-ellipsis whitespace-nowrap transition-colors ${
                   index === currentTrackIndex
                     ? 'text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999]'
-                    : 'text-[#f9b69d]/80 group-hover:text-[#f9b69d]'
+                    : 'text-[#8a4a3e] group-hover:text-[#d4725c]'
                 }`}>
                   {track.title}
                 </div>
                 {track.artist && (
-                  <div className="text-sm text-[#f9b69d]/50 overflow-hidden text-ellipsis whitespace-nowrap mt-1 font-light">
+                  <div className="text-sm text-[#b85e4f] overflow-hidden text-ellipsis whitespace-nowrap mt-1 font-normal">
                     {track.artist}
                   </div>
                 )}
               </div>
 
-              <div className="text-[#f9b69d]/40 text-sm font-light">
+              <div className="text-[#b85e4f] text-sm font-medium">
                 {formatTime(track.duration)}
               </div>
             </button>

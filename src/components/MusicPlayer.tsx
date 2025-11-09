@@ -3,10 +3,14 @@ import type { Track, Playlist, PlayerState } from '../types/music';
 import { parseM3U8, readTextFile, calculateTotalDuration } from '../utils/m3u8Parser';
 import PlayerControls from './PlayerControls';
 import PlaylistView from './PlaylistView';
+import LanguageSelector from './LanguageSelector';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function MusicPlayer() {
+  const { t } = useLanguage();
+
   const [playlist, setPlaylist] = useState<Playlist>({
-    name: 'Mi Playlist',
+    name: ' ',
     tracks: [],
     totalDuration: 0
   });
@@ -37,13 +41,13 @@ export default function MusicPlayer() {
 
         if (playerState.isPlaying) {
           audioRef.current.play().catch(err => {
-            console.error('Error al reproducir:', err);
+            console.error(t('errorPlaying'), err);
             setPlayerState(prev => ({ ...prev, isPlaying: false }));
           });
         }
       }
     }
-  }, [playerState.currentTrackIndex, playerState.isPlaying, playerState.volume, audioFiles, playlist.tracks]);
+  }, [playerState.currentTrackIndex, playerState.isPlaying, playerState.volume, audioFiles, playlist.tracks, t]);
 
   const handleNext = useCallback(() => {
     if (playlist.tracks.length === 0) return;
@@ -119,7 +123,7 @@ export default function MusicPlayer() {
     );
 
     if (!m3u8File) {
-      alert('No se encontró un archivo m3u8 o m3u en la carpeta seleccionada');
+      alert(t('noM3u8Found'));
       return;
     }
 
@@ -165,7 +169,7 @@ export default function MusicPlayer() {
       }
 
       if (tracksWithDuration.length === 0) {
-        alert('No se encontraron archivos de audio correspondientes a las pistas del m3u8');
+        alert(t('noAudioFilesFound'));
         return;
       }
 
@@ -183,7 +187,7 @@ export default function MusicPlayer() {
 
     } catch (error) {
       console.error('Error al cargar la playlist:', error);
-      alert('Error al cargar la playlist. Verifica el formato del archivo m3u8.');
+      alert(t('errorLoadingPlaylist'));
     }
   };
 
@@ -279,7 +283,7 @@ export default function MusicPlayer() {
       <div className="flex justify-between items-center gap-8 mb-2">
         <h1 className="flex items-center gap-3 text-4xl font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0">
           <svg viewBox="0 0 24 24" fill="url(#musicGradient)" className="w-11 h-11" aria-hidden="true">
-            <title>Música</title>
+            <title>{t('music')}</title>
             <defs>
               <linearGradient id="musicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#f9b69d" />
@@ -288,20 +292,24 @@ export default function MusicPlayer() {
             </defs>
             <path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/>
           </svg>
-          Música
+          {t('music')}
         </h1>
 
-        <button
-          type="button"
-          className="flex items-center gap-2.5 px-7 py-3.5 bg-white/70 backdrop-blur-xl text-[#f9b69d] border border-[#fce5e8]/40 rounded-full font-medium cursor-pointer transition-all hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(249,182,157,0.2)] hover:-translate-y-0.5 active:translate-y-0"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-            <title>Carpeta</title>
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-          </svg>
-          Seleccionar Carpeta
-        </button>
+        <div className="flex items-center gap-4">
+          <LanguageSelector />
+
+          <button
+            type="button"
+            className="flex items-center gap-2.5 px-7 py-3.5 bg-white/70 backdrop-blur-xl text-[#f9b69d] border border-[#fce5e8]/40 rounded-full font-medium cursor-pointer transition-all hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(249,182,157,0.2)] hover:-translate-y-0.5 active:translate-y-0"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+              <title>{t('folder')}</title>
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            {t('selectFolder')}
+          </button>
+        </div>
 
         <input
           ref={fileInputRef}

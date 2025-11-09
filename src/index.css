@@ -7,6 +7,9 @@
   --color-her-cream: #fef0e8;
   --color-her-beige: #f5e8dd;
   --color-her-coral: #ff9999;
+  --color-her-text-primary: #d4725c;
+  --color-her-text-secondary: #b85e4f;
+  --color-her-text-tertiary: #8a4a3e;
 }
 
 @keyframes playing {
