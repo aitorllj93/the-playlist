@@ -10,7 +10,7 @@ export interface M3U8Info {
 /**
  * Parsea el contenido de un archivo m3u8/m3u y retorna una lista de tracks
  */
-export function parseM3U8(content: string, basePath: string): Track[] {
+export function parseM3U8(content: string, _: string): Track[] {
   const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   const tracks: Track[] = [];
   let currentInfo: M3U8Info = {};
