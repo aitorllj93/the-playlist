@@ -1,127 +1,104 @@
-# 🎵 Reproductor de Música
+# The Playlist
 
-Un reproductor de música moderno y completo desarrollado con React, TypeScript y Vite que soporta archivos m3u8/m3u para gestionar playlists.
+Finally, an m3u8 player that shows you where you are.
 
-## ✨ Características
+## What it does
 
-- 📁 **Selección de carpetas**: Carga una carpeta completa con tu música y archivo m3u8
-- 🎼 **Soporte m3u8/m3u**: Parser completo para archivos de playlist m3u8 y m3u
-- 🎵 **Reproducción completa**: Play, pause, siguiente, anterior, búsqueda en la pista
-- 🔀 **Modo aleatorio**: Reproduce las canciones en orden aleatorio
-- 🔁 **Modos de repetición**: Sin repetición, repetir todas o repetir una canción
-- 🔊 **Control de volumen**: Ajusta el volumen con un slider intuitivo
-- 📊 **Progreso de playlist**: Visualiza el progreso total de toda la playlist
-- 🎨 **Interfaz moderna**: Diseño limpio y responsive con gradientes atractivos
-- ⚡ **Rendimiento optimizado**: Carga rápida y navegación fluida
+The Playlist transforms how you experience your music collections. Load a folder, see your progress, feel the flow.
 
-## 🚀 Instalación
+**Core features:**
+- Complete playlist progress visualization
+- Full m3u8/m3u format support
+- Seamless playback controls
+- Shuffle and repeat modes
+- Clean, responsive interface
+
+## Getting started
 
 ```bash
-# Clonar el repositorio
-git clone <url-del-repositorio>
+# Clone
+git clone <repository-url>
 
-# Navegar al directorio
+# Install
 cd the-playlist
-
-# Instalar dependencias
 pnpm install
 
-# Ejecutar en desarrollo
+# Run
 pnpm run dev
 ```
 
-## 🌐 Despliegue en GitHub Pages
+## Deploy to GitHub Pages
 
-Este proyecto está configurado para desplegarse automáticamente en GitHub Pages mediante GitHub Actions. Para activarlo:
+Push your code. GitHub Actions handles the rest.
 
-1. **Sube el código a GitHub**:
+1. **Push to main:**
 ```bash
 git add .
-git commit -m "Configurar GitHub Pages"
+git commit -m "Deploy to GitHub Pages"
 git push origin main
 ```
 
-2. **Activa GitHub Pages en tu repositorio**:
-   - Ve a **Settings** (Configuración) de tu repositorio
-   - En el menú lateral, selecciona **Pages**
-   - En **Source** (Fuente), selecciona **GitHub Actions**
+2. **Enable Pages:**
+   - Go to repository **Settings**
+   - Select **Pages**
+   - Under **Source**, choose **GitHub Actions**
 
-3. **El despliegue se ejecutará automáticamente** cada vez que hagas push a la rama `main`
+3. **Access your app at:**
+   `https://your-username.github.io/the-playlist/`
 
-4. **Accede a tu aplicación** en: `https://tu-usuario.github.io/the-playlist/`
+The workflow in `.github/workflows/deploy.yml` builds and deploys automatically.
 
-El workflow de GitHub Actions se encuentra en `.github/workflows/deploy.yml` y se encarga de:
-- Instalar las dependencias con pnpm
-- Construir el proyecto
-- Desplegarlo en GitHub Pages
+## How to use
 
-## 📖 Cómo usar
+1. Click **Select Folder** in the top right
+2. Choose a folder containing:
+   - An `.m3u8` or `.m3u` playlist file
+   - Your audio files (mp3, wav, ogg, m4a, flac)
+3. Play
 
-1. **Inicia la aplicación** ejecutando `pnpm run dev`
-2. **Haz clic en "Seleccionar Carpeta"** en la esquina superior derecha
-3. **Selecciona una carpeta** que contenga:
-   - Un archivo `.m3u8` o `.m3u` (playlist)
-   - Los archivos de audio correspondientes (mp3, wav, ogg, m4a, flac)
-4. **¡Disfruta de tu música!** El reproductor cargará automáticamente la playlist
+### m3u8 format
 
-### Formato del archivo m3u8
-
-El reproductor soporta el formato estándar m3u8:
+Standard format supported:
 
 ```m3u8
 #EXTM3U
-#EXTINF:180,Artista - Título de la canción
-cancion1.mp3
-#EXTINF:240,Otro Artista - Otra canción
-cancion2.mp3
+#EXTINF:180,Artist - Song Title
+song1.mp3
+#EXTINF:240,Another Artist - Another Song
+song2.mp3
 ```
 
-## 🎮 Controles
+Optional Properties:
 
-- **Play/Pause**: Reproduce o pausa la canción actual
-- **Siguiente**: Avanza a la siguiente canción
-- **Anterior**: Retrocede a la canción anterior (o reinicia si han pasado >3 segundos)
-- **Aleatorio**: Activa/desactiva la reproducción aleatoria
-- **Repetir**: Cicla entre sin repetición → repetir todas → repetir una
-- **Barra de progreso**: Haz clic para saltar a cualquier parte de la canción
-- **Control de volumen**: Ajusta el volumen de 0 a 100%
-- **Lista de pistas**: Haz clic en cualquier pista para reproducirla directamente
-
-## 🛠️ Tecnologías
-
-- **React 19** - Framework de interfaz de usuario
-- **TypeScript** - Tipado estático
-- **Vite** - Build tool y dev server
-- **CSS moderno** - Gradientes, animaciones y diseño responsive
-
-## 📝 Estructura del proyecto
-
-```
-the-playlist/
-├── src/
-│   ├── components/
-│   │   ├── MusicPlayer.tsx      # Componente principal
-│   │   ├── PlayerControls.tsx   # Controles de reproducción
-│   │   └── PlaylistView.tsx     # Vista de la playlist
-│   ├── types/
-│   │   └── music.ts             # Tipos de TypeScript
-│   ├── utils/
-│   │   └── m3u8Parser.ts        # Parser de archivos m3u8
-│   ├── App.tsx                  # Componente raíz
-│   ├── App.css                  # Estilos del reproductor
-│   └── index.css                # Estilos globales
-└── package.json
+```m3u8
+#EXTALB:Playlist Name
+#EXTIMG:./thumbnail.jpg
+#EXTVLCOPT:arturl=./thumbnail.jpg
 ```
 
-## 🎨 Características de diseño
+## Controls
 
-- Gradiente púrpura moderno
-- Animaciones suaves en todas las interacciones
-- Indicador visual de la canción en reproducción
-- Barra de progreso interactiva
-- Diseño responsive para móviles y tablets
-- Scroll personalizado en la lista de pistas
+Simple. Intuitive. Complete.
 
-## 📄 Licencia
+- **Play/Pause** — start or stop
+- **Next/Previous** — navigate tracks
+- **Shuffle** — randomize playback
+- **Repeat** — none, all, or one
+- **Progress bar** — jump anywhere
+- **Volume** — 0 to 100%
+- **Track list** — tap to play
 
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
+## Built with
+
+- React 19
+- TypeScript
+- Vite
+- Modern CSS
+
+## License
+
+MIT — open and free.
+
+---
+
+**The Playlist** — Simple. Visual. Complete.
