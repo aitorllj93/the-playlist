@@ -11,6 +11,7 @@ interface PlaylistViewProps {
   playlistName: string;
   totalDuration: number;
   currentPlaylistTime: number;
+  isPlaying: boolean;
 }
 
 export default function PlaylistView({
@@ -19,7 +20,8 @@ export default function PlaylistView({
   onTrackSelect,
   playlistName,
   totalDuration,
-  currentPlaylistTime
+  currentPlaylistTime,
+  isPlaying
 }: PlaylistViewProps) {
   const { t } = useLanguage();
   const totalProgress = totalDuration > 0 ? (currentPlaylistTime / totalDuration) * 100 : 0;
@@ -203,11 +205,17 @@ export default function PlaylistView({
             >
               <div className="w-8 flex items-center justify-center text-[#b85e4f] font-medium text-sm">
                 {index === currentTrackIndex ? (
-                  <div className="flex gap-1 items-center h-5">
-                    <span className="w-0.5 bg-linear-to-t from-[#f9b69d] to-[#ff9999] rounded-full animate-[playing_0.8s_ease-in-out_infinite]" />
-                    <span className="w-0.5 bg-linear-to-t from-[#f9b69d] to-[#ff9999] rounded-full animate-[playing_0.8s_ease-in-out_0.2s_infinite]" />
-                    <span className="w-0.5 bg-linear-to-t from-[#f9b69d] to-[#ff9999] rounded-full animate-[playing_0.8s_ease-in-out_0.4s_infinite]" />
-                  </div>
+                  isPlaying ? (
+                    <div className="flex gap-1 items-center h-5">
+                      <span className="w-0.5 bg-linear-to-t from-[#f9b69d] to-[#ff9999] rounded-full animate-[playing_0.8s_ease-in-out_infinite]" />
+                      <span className="w-0.5 bg-linear-to-t from-[#f9b69d] to-[#ff9999] rounded-full animate-[playing_0.8s_ease-in-out_0.2s_infinite]" />
+                      <span className="w-0.5 bg-linear-to-t from-[#f9b69d] to-[#ff9999] rounded-full animate-[playing_0.8s_ease-in-out_0.4s_infinite]" />
+                    </div>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#d4725c]" aria-hidden="true">
+                      <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
+                    </svg>
+                  )
                 ) : (
                   <span>{index + 1}</span>
                 )}

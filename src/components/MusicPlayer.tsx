@@ -44,24 +44,29 @@ export default function MusicPlayer() {
 			const currentTrack = playlist.tracks[playerState.currentTrackIndex];
 			const audioUrl = audioFiles.get(currentTrack.fileName);
 
-			if (audioUrl) {
+			if (audioUrl && audioRef.current.src !== audioUrl) {
 				audioRef.current.src = audioUrl;
-
-				if (playerState.isPlaying) {
-					audioRef.current.play().catch((err) => {
-						console.error(t("errorPlaying"), err);
-						setPlayerState((prev) => ({ ...prev, isPlaying: false }));
-					});
-				}
 			}
 		}
 	}, [
 		playerState.currentTrackIndex,
-		playerState.isPlaying,
 		audioFiles,
 		playlist.tracks,
-		t,
 	]);
+
+	// Manejar play/pause sin reiniciar el audio
+	useEffect(() => {
+		if (audioRef.current && playlist.tracks.length > 0) {
+			if (playerState.isPlaying) {
+				audioRef.current.play().catch((err) => {
+					console.error(t("errorPlaying"), err);
+					setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+				});
+			} else {
+				audioRef.current.pause();
+			}
+		}
+	}, [playerState.isPlaying, playlist.tracks.length, t]);
 
 	// Sincronizar volumen sin reiniciar la reproducción
 	useEffect(() => {
@@ -544,6 +549,7 @@ export default function MusicPlayer() {
 					playlistName={playlist.name}
 					totalDuration={playlist.totalDuration}
 					currentPlaylistTime={currentPlaylistTime}
+					isPlaying={playerState.isPlaying}
 				/>
 			</div>
 
