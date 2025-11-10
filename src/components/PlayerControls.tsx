@@ -43,6 +43,7 @@ export default function PlayerControls({
 }: PlayerControlsProps) {
   const { t } = useLanguage();
   const progressRef = useRef<HTMLDivElement>(null);
+  const particleIds = ['particle-1', 'particle-2', 'particle-3'];
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!progressRef.current || !audioRef.current) return;
@@ -140,25 +141,53 @@ export default function PlayerControls({
       {/* Barra de progreso */}
       <div className="flex items-center gap-3 px-2">
         <span className="text-xs text-[#b85e4f] font-medium tracking-wide min-w-10 text-right">{formatTime(currentTime)}</span>
-        <div
-          ref={progressRef}
-          className="flex-1 h-1 bg-white/40 rounded-full cursor-pointer overflow-hidden backdrop-blur-sm relative group"
-          onClick={handleProgressClick}
-          onKeyDown={(e) => e.key === 'Enter' && handleProgressClick(e as unknown as React.MouseEvent<HTMLDivElement>)}
-          role="slider"
-          aria-valuemin={0}
-          aria-valuemax={actualDuration}
-          aria-valuenow={currentTime}
-          tabIndex={0}
-        >
+        <div className="flex-1 relative">
           <div
-            className="h-full bg-linear-to-r from-[#f9b69d] via-[#fec5b2] to-[#ff9999] transition-all duration-150 rounded-full shadow-[0_0_10px_rgba(249,182,157,0.5)]"
-            style={{ width: `${progressPercentage}%` }}
-          />
-          <div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ left: `calc(${progressPercentage}% - 6px)` }}
-          />
+            ref={progressRef}
+            className="w-full h-1 bg-white/40 rounded-full cursor-pointer backdrop-blur-sm relative group"
+            onClick={handleProgressClick}
+            onKeyDown={(e) => e.key === 'Enter' && handleProgressClick(e as unknown as React.MouseEvent<HTMLDivElement>)}
+            role="slider"
+            aria-valuemin={0}
+            aria-valuemax={actualDuration}
+            aria-valuenow={currentTime}
+            tabIndex={0}
+          >
+            <div
+              className={`h-full bg-linear-to-r from-[#f9b69d] via-[#fec5b2] to-[#ff9999] transition-all duration-150 rounded-full relative overflow-hidden ${
+                isPlaying ? 'animate-[glow-pulse_2s_ease-in-out_infinite]' : 'filter-[drop-shadow(0_0_4px_rgba(249,182,157,0.5))]'
+              }`}
+              style={{ width: `${progressPercentage}%` }}
+            >
+              {/* Efecto de brillo animado cuando está reproduciéndose */}
+              {isPlaying && (
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent animate-[shimmer_2s_infinite]" />
+              )}
+            </div>
+            {/* Partículas flotantes animadas */}
+            {isPlaying && progressPercentage > 10 && (
+              particleIds.map((id, i) => (
+                <div
+                  key={id}
+                  className="absolute w-1 h-1 bg-white/60 rounded-full pointer-events-none"
+                  style={{
+                    left: `${Math.min(progressPercentage - 10, Math.random() * (progressPercentage - 10))}%`,
+                    animationName: 'float-particle',
+                    animationDuration: `${2 + i * 0.5}s`,
+                    animationTimingFunction: 'ease-in-out',
+                    animationIterationCount: 'infinite',
+                    animationDelay: `${i * 0.3}s`,
+                    top: '50%',
+                    transform: 'translateY(-50%)'
+                  }}
+                />
+              ))
+            )}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+              style={{ left: `calc(${progressPercentage}% - 6px)` }}
+            />
+          </div>
         </div>
         <span className="text-xs text-[#b85e4f] font-medium tracking-wide min-w-10">
           {formatTime(actualDuration)}

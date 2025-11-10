@@ -137,13 +137,34 @@ export default function PlaylistView({
               )}
 
               {/* Barra de progreso - siempre visible */}
-              <div className={`bg-white/50 rounded-full overflow-hidden backdrop-blur-sm transition-all duration-300 ${
+              <div className={`bg-white/50 rounded-full overflow-hidden backdrop-blur-sm transition-all duration-300 relative ${
                 isScrolled ? 'h-1' : 'h-1.5'
               }`}>
                 <div
-                  className="h-full bg-linear-to-r from-[#f9b69d] via-[#fec5b2] to-[#ff9999] transition-all duration-300 ease-out rounded-full shadow-[0_0_10px_rgba(249,182,157,0.4)]"
+                  className="h-full bg-linear-to-r from-[#f9b69d] via-[#fec5b2] to-[#ff9999] transition-all duration-300 ease-out rounded-full shadow-[0_0_10px_rgba(249,182,157,0.4)] relative overflow-hidden"
                   style={{ width: `${totalProgress}%` }}
-                />
+                >
+                  {/* Mini-barras de "visualización de audio" */}
+                  {isPlaying && !isScrolled && (
+                    <div className="absolute inset-0 flex items-center justify-around px-1">
+                      {[...Array(8)].map((_, i) => (
+                        <div
+                          key={`audio-bar-${i}`}
+                          className="w-0.5 bg-white/50 rounded-full"
+                          style={{
+                            height: '60%',
+                            animationName: 'audio-bar',
+                            animationDuration: `${0.5 + Math.random() * 0.5}s`,
+                            animationTimingFunction: 'ease-in-out',
+                            animationIterationCount: 'infinite',
+                            animationDirection: 'alternate',
+                            animationDelay: `${i * 0.1}s`
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

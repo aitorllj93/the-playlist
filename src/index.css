@@ -34,6 +34,37 @@
   }
 }
 
+/* Animaciones para barras de progreso divertidas */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(249,182,157,0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(249,182,157,0.8));
+  }
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-8px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes audio-bar {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1); }
+}
+
 html {
   scrollbar-gutter: stable;
 }

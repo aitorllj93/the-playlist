@@ -181,6 +181,7 @@ export default function MusicPlayer() {
 		if (playlist.tracks.length === 0) return;
 
 		let nextIndex: number;
+		let shouldShowMiniConfetti = false;
 
 		if (playerState.repeat === "one") {
 			nextIndex = playerState.currentTrackIndex;
@@ -189,11 +190,13 @@ export default function MusicPlayer() {
 			}
 		} else if (playerState.shuffle) {
 			nextIndex = Math.floor(Math.random() * playlist.tracks.length);
+			shouldShowMiniConfetti = true;
 		} else {
 			nextIndex = playerState.currentTrackIndex + 1;
 			if (nextIndex >= playlist.tracks.length) {
 				if (playerState.repeat === "all") {
 					nextIndex = 0;
+					shouldShowMiniConfetti = true;
 				} else {
 					// La playlist ha terminado sin modo repetición - ¡lanzar confetis! 🎉
 					confetti({
@@ -227,7 +230,21 @@ export default function MusicPlayer() {
 					setPlayerState((prev) => ({ ...prev, isPlaying: false }));
 					return;
 				}
+			} else {
+				shouldShowMiniConfetti = true;
 			}
+		}
+
+		// Mini confetti al cambiar de canción (no cuando se repite la misma)
+		if (shouldShowMiniConfetti && nextIndex !== playerState.currentTrackIndex) {
+			confetti({
+				particleCount: 20,
+				spread: 40,
+				origin: { y: 0.8 },
+				colors: ['#f9b69d', '#fec5b2', '#ff9999'],
+				scalar: 0.6,
+				ticks: 100
+			});
 		}
 
 		setPlayerState((prev) => ({
