@@ -57,7 +57,6 @@ export default function MusicPlayer() {
 	useEffect(() => {
 		const restorePlaylist = async () => {
 			if (hasStoredPlaylists()) {
-				console.log("🔄 Restaurando última playlist...");
 				const stored = await loadLastPlaylist();
 
 				if (stored.playlist && stored.audioFiles.size > 0) {
@@ -77,8 +76,6 @@ export default function MusicPlayer() {
 						totalTime += stored.playerState.currentTime;
 						setCurrentPlaylistTime(totalTime);
 					}
-
-					console.log("✅ Playlist restaurada desde almacenamiento");
 				}
 			}
 			setIsLoadingStorage(false);
@@ -92,7 +89,6 @@ export default function MusicPlayer() {
 		if (isLoadingStorage || playlist.tracks.length === 0) return;
 
 		const timeoutId = setTimeout(() => {
-			console.log("💾 Guardando playlist...");
 			savePlaylist(
 				playlist,
 				audioFiles,
@@ -300,10 +296,6 @@ export default function MusicPlayer() {
 		try {
 			// Leer y parsear el archivo m3u8
 			const content = await readTextFile(m3u8File);
-			console.log(
-				"📂 Archivos en la carpeta:",
-				fileList.map((f) => `${f.name} (${f.type})`),
-			);
 			const { tracks: parsedTracks, groups } = parseM3U8(content, "", true);
 			setPlaylistGroups(groups);
 
@@ -318,23 +310,10 @@ export default function MusicPlayer() {
 				parsedTracks.map((t) => t.albumArt).filter(Boolean),
 			);
 
-			console.log("🔍 Imágenes a buscar:", Array.from(uniqueAlbumArts));
-			console.log(
-				"🖼️ Archivos de imagen en la carpeta:",
-				fileList
-					.filter(
-						(f) =>
-							f.type.startsWith("image/") ||
-							/\.(jpg|jpeg|png|gif|webp)$/i.test(f.name),
-					)
-					.map((f) => `${f.name} (${f.type || "sin tipo"})`),
-			);
-
 			for (const albumArtPath of uniqueAlbumArts) {
 				if (albumArtPath) {
 					const albumArtFileName =
 						albumArtPath.split("/").pop() || albumArtPath;
-					console.log(`🔎 Buscando: "${albumArtFileName}"`);
 
 					// Búsqueda más flexible
 					const albumArtFile = fileList.find((file) => {
@@ -347,21 +326,12 @@ export default function MusicPlayer() {
 							// Buscar archivos de imagen aunque no tengan el tipo MIME correcto
 							(/\.(jpg|jpeg|png|gif|webp)$/i.test(file.name) &&
 								file.name.toLowerCase() === albumArtFileName.toLowerCase());
-
-						if (match) {
-							console.log(
-								`   ✓ Encontrado: ${file.name} (${file.type || "sin tipo"})`,
-							);
-						}
 						return match;
 					});
 
 					if (albumArtFile) {
 						const artUrl = URL.createObjectURL(albumArtFile);
 						loadedAlbumArts.set(albumArtPath, artUrl);
-						console.log(
-							`✓ Imagen cargada exitosamente: ${albumArtFileName} → ${artUrl.substring(0, 50)}...`,
-						);
 					} else {
 						console.error(`✗ No se encontró la imagen: ${albumArtFileName}`);
 						console.error(
@@ -392,15 +362,9 @@ export default function MusicPlayer() {
 						// Actualizar título y artista si están disponibles en los metadatos
 						if (metadata.title) {
 							track.title = metadata.title;
-							console.log(
-								`🎵 Título extraído de metadatos: "${metadata.title}" para "${track.fileName}"`,
-							);
 						}
 						if (metadata.artist) {
 							track.artist = metadata.artist;
-							console.log(
-								`🎤 Artista extraído de metadatos: "${metadata.artist}" para "${track.fileName}"`,
-							);
 						}
 					}
 
@@ -410,18 +374,12 @@ export default function MusicPlayer() {
 						track.embeddedCoverUrl = embeddedCover;
 						// Usar el cover embebido en el mapa de arte del álbum
 						artMap.set(track.fileName, embeddedCover);
-						console.log(
-							`🎨 Cover embebido encontrado para: "${track.fileName}" → ${embeddedCover.substring(0, 50)}...`,
-						);
 					}
 					// Si no hay cover embebido, usar el del álbum de la playlist
 					else if (track.albumArt && loadedAlbumArts.has(track.albumArt)) {
 						const artUrl = loadedAlbumArts.get(track.albumArt);
 						if (artUrl) {
 							artMap.set(track.fileName, artUrl);
-							console.log(
-								`🔗 Asociando imagen al track: "${track.fileName}" → ${artUrl.substring(0, 50)}...`,
-							);
 						}
 					} else if (track.albumArt) {
 						console.warn(
@@ -457,17 +415,6 @@ export default function MusicPlayer() {
 
 			setAudioFiles(audioMap);
 			setAlbumArtUrls(artMap);
-
-			console.log("📊 Resumen de carga:");
-			console.log(`   - Tracks cargados: ${tracksWithDuration.length}`);
-			console.log(`   - Audio URLs: ${audioMap.size}`);
-			console.log(`   - Album Art URLs: ${artMap.size}`);
-			console.log(
-				"   - Mapeo de imágenes:",
-				Array.from(artMap.entries()).map(
-					([k, v]) => `"${k}" → ${v.substring(0, 40)}...`,
-				),
-			);
 
 			const totalDuration = calculateTotalDuration(tracksWithDuration);
 			setPlaylist({
@@ -614,7 +561,6 @@ export default function MusicPlayer() {
 	const handleLoadSavedPlaylist = async (playlistId: string) => {
 		try {
 			setIsLoadingStorage(true);
-			console.log(`🔄 Cargando playlist guardada: ${playlistId}`);
 			const stored = await loadPlaylistById(playlistId);
 
 			if (stored.playlist && stored.audioFiles.size > 0) {
@@ -638,8 +584,6 @@ export default function MusicPlayer() {
 					totalTime += stored.playerState.currentTime;
 					setCurrentPlaylistTime(totalTime);
 				}
-
-				console.log("✅ Playlist cargada exitosamente y reproduciendo");
 			}
 		} catch (error) {
 			console.error("Error al cargar playlist guardada:", error);
@@ -653,15 +597,6 @@ export default function MusicPlayer() {
 	const currentAlbumArt = currentTrack
 		? albumArtUrls.get(currentTrack.fileName)
 		: null;
-
-	console.log("🎨 Render - Track actual:", currentTrack?.title);
-	console.log("   - fileName:", currentTrack?.fileName);
-	console.log("   - albumArt en track:", currentTrack?.albumArt);
-	console.log(
-		"   - Album Art URLs disponibles:",
-		Array.from(albumArtUrls.keys()),
-	);
-	console.log("   - Album Art URL encontrada:", currentAlbumArt || "NINGUNA");
 
 	// Integración con Media Session API para controles del teclado
 	useEffect(() => {

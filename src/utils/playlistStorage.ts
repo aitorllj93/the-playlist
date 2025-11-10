@@ -217,8 +217,6 @@ export async function savePlaylist(
 
 		// Guardar como última playlist activa
 		localStorage.setItem(LOCALSTORAGE_LAST_PLAYLIST, id);
-
-		console.log(`✅ Playlist "${playlist.name}" guardada exitosamente (ID: ${id})`);
 		return id;
 	} catch (error) {
 		console.error("❌ Error al guardar la playlist:", error);
@@ -278,11 +276,6 @@ export async function loadPlaylistById(playlistId: string): Promise<{
 
 		// Marcar como última playlist activa
 		localStorage.setItem(LOCALSTORAGE_LAST_PLAYLIST, playlistId);
-
-		console.log(`✅ Playlist "${playlist.name}" restaurada exitosamente`);
-		console.log(`   - Tracks: ${playlist.tracks.length}`);
-		console.log(`   - Audio files: ${audioFiles.size}`);
-		console.log(`   - Images: ${albumArtUrls.size}`);
 
 		return {
 			playlist,
@@ -349,8 +342,6 @@ export async function deletePlaylist(playlistId: string): Promise<void> {
 		if (localStorage.getItem(LOCALSTORAGE_LAST_PLAYLIST) === playlistId) {
 			localStorage.removeItem(LOCALSTORAGE_LAST_PLAYLIST);
 		}
-
-		console.log(`✅ Playlist eliminada exitosamente (ID: ${playlistId})`);
 	} catch (error) {
 		console.error("❌ Error al eliminar la playlist:", error);
 		throw error;
@@ -369,7 +360,6 @@ export async function clearAllPlaylists(): Promise<void> {
 		for (const playlist of playlists) {
 			await deletePlaylist(playlist.id);
 		}
-		console.log("✅ Todas las playlists limpiadas exitosamente");
 	} catch (error) {
 		console.error("❌ Error al limpiar todas las playlists:", error);
 		throw error;

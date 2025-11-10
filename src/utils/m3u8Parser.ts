@@ -37,7 +37,6 @@ export function parseM3U8(content: string, _: string, includeGroups?: boolean): 
     if (line.startsWith('#EXTGRP:')) {
       const groupName = line.substring(8).trim(); // Remover '#EXTGRP:'
       currentGroup = groupName;
-      console.log(`📁 Grupo detectado: "${currentGroup}"`);
       continue;
     }
 
@@ -64,13 +63,11 @@ export function parseM3U8(content: string, _: string, includeGroups?: boolean): 
     else if (line.startsWith('#EXTIMG:')) {
       const imagePath = line.substring(8).trim(); // Remover '#EXTIMG:'
       currentAlbumArt = imagePath;
-      console.log(`📸 Album art detectado (#EXTIMG): ${currentAlbumArt}`);
     }
     // Parsear imagen del álbum #EXTVLCOPT:arturl= - se aplica a todas las canciones siguientes
     else if (line.startsWith('#EXTVLCOPT:arturl=')) {
       const imagePath = line.substring(18).trim(); // Remover '#EXTVLCOPT:arturl='
       currentAlbumArt = imagePath;
-      console.log(`📸 Album art detectado (#EXTVLCOPT): ${currentAlbumArt}`);
     }
     // Si no es un comentario, es una ruta de archivo
     else if (!line.startsWith('#')) {
@@ -80,7 +77,6 @@ export function parseM3U8(content: string, _: string, includeGroups?: boolean): 
       // Si hay un grupo actual, guardarlo para este track
       if (currentGroup) {
         groups.set(tracks.length, currentGroup);
-        console.log(`📁 Asignando grupo "${currentGroup}" al track #${tracks.length}: "${title}"`);
         currentGroup = undefined; // Reset del grupo después de asignarlo
       }
 
@@ -94,7 +90,6 @@ export function parseM3U8(content: string, _: string, includeGroups?: boolean): 
         albumArt: currentAlbumArt // Usar el album art actual (persiste entre tracks)
       };
 
-      console.log(`🎵 Track añadido: "${title}" | Album Art: ${currentAlbumArt || 'ninguno'}`);
       tracks.push(track);
 
       // Reset solo la info del track, NO el album art
