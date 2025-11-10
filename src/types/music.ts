@@ -13,6 +13,7 @@ export interface Playlist {
   name: string;
   tracks: Track[];
   totalDuration: number;
+  groups?: Record<number, string>; // Map de índice de track -> nombre de grupo (serializable)
 }
 
 export interface PlayerState {

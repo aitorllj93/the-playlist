@@ -65,6 +65,17 @@ export default function MusicPlayer() {
 					setAlbumArtUrls(stored.albumArtUrls);
 					setCurrentPlaylistId(stored.playlistId);
 
+					// Restaurar grupos si existen
+					if (stored.playlist.groups) {
+						const groupsMap = new Map<number, string>();
+						for (const [key, value] of Object.entries(stored.playlist.groups)) {
+							groupsMap.set(Number(key), value);
+						}
+						setPlaylistGroups(groupsMap);
+					} else {
+						setPlaylistGroups(new Map());
+					}
+
 					if (stored.playerState) {
 						setPlayerState(stored.playerState);
 
@@ -89,8 +100,19 @@ export default function MusicPlayer() {
 		if (isLoadingStorage || playlist.tracks.length === 0) return;
 
 		const timeoutId = setTimeout(() => {
+			// Convertir el Map de grupos a un objeto Record para poder serializarlo
+			const groupsRecord: Record<number, string> = {};
+			playlistGroups.forEach((value, key) => {
+				groupsRecord[key] = value;
+			});
+
+			const playlistWithGroups = {
+				...playlist,
+				groups: Object.keys(groupsRecord).length > 0 ? groupsRecord : undefined,
+			};
+
 			savePlaylist(
-				playlist,
+				playlistWithGroups,
 				audioFiles,
 				albumArtUrls,
 				playerState,
@@ -114,6 +136,7 @@ export default function MusicPlayer() {
 		playerState,
 		isLoadingStorage,
 		currentPlaylistId,
+		playlistGroups,
 	]);
 
 	// Cargar archivo de audio cuando cambia el track
@@ -453,11 +476,18 @@ export default function MusicPlayer() {
 
 			// Guardar inmediatamente la playlist
 			setTimeout(() => {
+				// Convertir el Map de grupos a un objeto Record para poder serializarlo
+				const groupsRecord: Record<number, string> = {};
+				groups.forEach((value, key) => {
+					groupsRecord[key] = value;
+				});
+
 				savePlaylist(
 					{
 						name: m3u8File.name.replace(/\.(m3u8|m3u)$/i, ""),
 						tracks: tracksWithDuration,
 						totalDuration,
+						groups: Object.keys(groupsRecord).length > 0 ? groupsRecord : undefined,
 					},
 					audioMap,
 					artMap,
@@ -585,6 +615,17 @@ export default function MusicPlayer() {
 				setAudioFiles(stored.audioFiles);
 				setAlbumArtUrls(stored.albumArtUrls);
 				setCurrentPlaylistId(stored.playlistId);
+
+				// Restaurar grupos si existen
+				if (stored.playlist.groups) {
+					const groupsMap = new Map<number, string>();
+					for (const [key, value] of Object.entries(stored.playlist.groups)) {
+						groupsMap.set(Number(key), value);
+					}
+					setPlaylistGroups(groupsMap);
+				} else {
+					setPlaylistGroups(new Map());
+				}
 
 				if (stored.playerState) {
 					// Activar reproducción automática al cambiar de playlist
@@ -838,7 +879,7 @@ export default function MusicPlayer() {
 
 				{/* Header con botón para cargar playlist */}
 				<div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-6 lg:gap-8 mb-2">
-					<h1 className="flex items-center gap-2 sm:gap-3 text-3xl sm:text-4xl lg:text-5xl font-logo font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0 shrink-0">
+					<h1 className="pr-2 flex items-center gap-2 sm:gap-3 text-3xl sm:text-4xl lg:text-5xl font-logo font-light tracking-tight text-transparent bg-clip-text bg-linear-to-r from-[#f9b69d] to-[#ff9999] m-0 shrink-0">
 						<img
 							src={logo}
 							alt={t("music")}

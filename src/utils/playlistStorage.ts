@@ -187,6 +187,7 @@ export async function savePlaylist(
 			name: playlist.name,
 			tracks: playlist.tracks,
 			totalDuration: playlist.totalDuration,
+			groups: playlist.groups, // Guardar los grupos
 		};
 		localStorage.setItem(`playlist_${id}`, JSON.stringify(playlistData));
 
