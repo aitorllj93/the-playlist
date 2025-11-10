@@ -760,6 +760,89 @@ export default function MusicPlayer() {
 		handleSeek,
 	]);
 
+	// Controles de teclado globales
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Solo procesar si hay tracks cargados
+			if (playlist.tracks.length === 0) return;
+
+			// Ignorar eventos de teclado si el usuario está escribiendo en un input/textarea
+			const target = e.target as HTMLElement;
+			if (
+				target.tagName === "INPUT" ||
+				target.tagName === "TEXTAREA" ||
+				target.isContentEditable
+			) {
+				return;
+			}
+
+			switch (e.key) {
+				case "ArrowLeft":
+					// Retroceder 5 segundos
+					e.preventDefault();
+					if (audioRef.current) {
+						const newTime = Math.max(0, audioRef.current.currentTime - 5);
+						handleSeek(newTime);
+					}
+					break;
+
+				case "ArrowRight":
+					// Avanzar 5 segundos
+					e.preventDefault();
+					if (audioRef.current && currentTrack) {
+						const newTime = Math.min(
+							currentTrack.duration,
+							audioRef.current.currentTime + 5
+						);
+						handleSeek(newTime);
+					}
+					break;
+
+				case "ArrowUp":
+					// Canción anterior
+					e.preventDefault();
+					handlePrevious();
+					break;
+
+				case "ArrowDown":
+					// Canción siguiente
+					e.preventDefault();
+					handleNext();
+					break;
+
+				case " ": // Barra espaciadora
+					// Pausar/reanudar
+					e.preventDefault();
+					if (playerState.isPlaying) {
+						handlePause();
+					} else {
+						handlePlay();
+					}
+					break;
+
+				default:
+					break;
+			}
+		};
+
+		// Agregar event listener al documento
+		document.addEventListener("keydown", handleKeyDown);
+
+		// Limpiar al desmontar
+		return () => {
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [
+		playlist.tracks.length,
+		playerState.isPlaying,
+		currentTrack,
+		handlePlay,
+		handlePause,
+		handleNext,
+		handlePrevious,
+		handleSeek,
+	]);
+
 	return (
 		<>
 
