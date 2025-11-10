@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Track } from '../types/music';
 import { formatTime } from '../utils/m3u8Parser';
@@ -44,6 +44,52 @@ export default function PlayerControls({
   const { t } = useLanguage();
   const progressRef = useRef<HTMLDivElement>(null);
   const particleIds = ['particle-1', 'particle-2', 'particle-3'];
+  const [buttonIcon, setButtonIcon] = useState<'play' | 'vinyl' | 'vinyl-spinning' | 'pause'>('play');
+  const previousIsPlayingRef = useRef(false);
+
+  // Detectar cuando se inicia la reproducción para mostrar animación de vinilo
+  useEffect(() => {
+    let spinTimer: ReturnType<typeof setTimeout> | null = null;
+    let pauseTimer: ReturnType<typeof setTimeout> | null = null;
+
+    // Si cambió de false a true (se inició la reproducción)
+    if (!previousIsPlayingRef.current && isPlaying) {
+      console.log('🎵 Iniciando animación de vinilo');
+      // Secuencia: play → vinyl → vinyl-spinning → pause
+      setButtonIcon('vinyl');
+
+      // Después de 300ms, empezar a girar
+      spinTimer = setTimeout(() => {
+        console.log('🔄 Vinilo girando');
+        setButtonIcon('vinyl-spinning');
+      }, 300);
+
+      // Después de 2 segundos de girar, cambiar a pause
+      pauseTimer = setTimeout(() => {
+        console.log('⏸️ Cambiando a pausa');
+        setButtonIcon('pause');
+      }, 2300); // 300ms transición + 2000ms girando
+    }
+
+    // Si cambió de true a false (se pausó)
+    if (previousIsPlayingRef.current && !isPlaying) {
+      console.log('▶️ Pausado - volviendo a play');
+      setButtonIcon('play');
+    }
+
+    // Actualizar el valor anterior
+    previousIsPlayingRef.current = isPlaying;
+
+    // Cleanup function
+    return () => {
+      if (spinTimer) {
+        clearTimeout(spinTimer);
+      }
+      if (pauseTimer) {
+        clearTimeout(pauseTimer);
+      }
+    };
+  }, [isPlaying]);
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!progressRef.current || !audioRef.current) return;
@@ -226,22 +272,75 @@ export default function PlayerControls({
 
         <button
           type="button"
-          className="bg-linear-to-br from-[#f9b69d] via-[#fec5b2] to-[#ff9999] text-white p-3 border-none cursor-pointer rounded-full flex items-center justify-center transition-all hover:shadow-[0_8px_25px_rgba(249,182,157,0.4)] hover:scale-105 active:scale-95"
+          className={`bg-linear-to-br from-[#f9b69d] via-[#fec5b2] to-[#ff9999] text-white p-3 border-none cursor-pointer rounded-full flex items-center justify-center transition-all hover:shadow-[0_8px_25px_rgba(249,182,157,0.4)] hover:scale-105 active:scale-95 ${
+            buttonIcon === 'vinyl-spinning' ? 'animate-[vinyl-spin_0.8s_linear_infinite]' : ''
+          }`}
           onClick={isPlaying ? onPause : onPlay}
           title={isPlaying ? t('pause') : t('play')}
           aria-label={isPlaying ? t('pause') : t('play')}
         >
-          {isPlaying ? (
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden="true">
-              <title>{t('pause')}</title>
-              <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-0.5" aria-hidden="true">
-              <title>{t('play')}</title>
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          )}
+          <div className="relative w-5 h-5 flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              {buttonIcon === 'play' && (
+                <motion.svg
+                  key="play"
+                  initial={{ scale: 0, rotate: -180, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  exit={{ scale: 0, rotate: 180, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5 ml-0.5 absolute inset-0"
+                  aria-hidden="true"
+                >
+                  <title>{t('play')}</title>
+                  <path d="M8 5v14l11-7z"/>
+                </motion.svg>
+              )}
+
+              {(buttonIcon === 'vinyl' || buttonIcon === 'vinyl-spinning') && (
+                <motion.svg
+                  key="vinyl"
+                  initial={{ scale: 0, rotate: -180, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  exit={{ scale: 0, rotate: 180, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5 absolute inset-0"
+                  aria-hidden="true"
+                >
+                  <title>Vinyl</title>
+                  {/* Disco exterior */}
+                  <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.9"/>
+                  {/* Círculo central (etiqueta del disco) */}
+                  <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.4"/>
+                  {/* Agujero central */}
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" opacity="1"/>
+                  {/* Líneas del vinilo (surcos) */}
+                  <circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.3"/>
+                  <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.3"/>
+                </motion.svg>
+              )}
+
+              {buttonIcon === 'pause' && (
+                <motion.svg
+                  key="pause"
+                  initial={{ scale: 0, rotate: -180, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  exit={{ scale: 0, rotate: 180, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5 absolute inset-0"
+                  aria-hidden="true"
+                >
+                  <title>{t('pause')}</title>
+                  <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
+                </motion.svg>
+              )}
+            </AnimatePresence>
+          </div>
         </button>
 
         <button

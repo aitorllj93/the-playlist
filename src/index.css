@@ -65,6 +65,12 @@
   100% { transform: scaleY(1); }
 }
 
+/* Animación de disco de vinilo girando */
+@keyframes vinyl-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 html {
   scrollbar-gutter: stable;
 }
