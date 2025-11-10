@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
 import type { Track, Playlist, PlayerState } from "../types/music";
 import {
 	parseM3U8,
@@ -198,6 +199,35 @@ export default function MusicPlayer() {
 				if (playerState.repeat === "all") {
 					nextIndex = 0;
 				} else {
+					// La playlist ha terminado sin modo repetición - ¡lanzar confetis! 🎉
+					confetti({
+						particleCount: 100,
+						spread: 70,
+						origin: { y: 0.6 },
+						colors: ['#f9b69d', '#fec5b2', '#ff9999', '#fce5e8', '#d4725c']
+					});
+
+					// Lanzar confetis adicionales desde los lados
+					setTimeout(() => {
+						confetti({
+							particleCount: 50,
+							angle: 60,
+							spread: 55,
+							origin: { x: 0 },
+							colors: ['#f9b69d', '#fec5b2', '#ff9999', '#fce5e8', '#d4725c']
+						});
+					}, 250);
+
+					setTimeout(() => {
+						confetti({
+							particleCount: 50,
+							angle: 120,
+							spread: 55,
+							origin: { x: 1 },
+							colors: ['#f9b69d', '#fec5b2', '#ff9999', '#fce5e8', '#d4725c']
+						});
+					}, 400);
+
 					setPlayerState((prev) => ({ ...prev, isPlaying: false }));
 					return;
 				}
@@ -691,14 +721,19 @@ export default function MusicPlayer() {
 				}
 			});
 
-			// Actualizar el estado de posición
-			if (audioRef.current && currentTrack.duration) {
-				navigator.mediaSession.setPositionState({
-					duration: currentTrack.duration,
-					playbackRate: audioRef.current.playbackRate,
-					position: playerState.currentTime,
-				});
-			}
+		// Actualizar el estado de posición
+		if (audioRef.current && currentTrack.duration) {
+			// Usar la duración real del audio si está disponible
+			const actualDuration = audioRef.current.duration || currentTrack.duration;
+			// Asegurarse de que la posición nunca sea mayor que la duración
+			const safePosition = Math.min(playerState.currentTime, actualDuration);
+
+			navigator.mediaSession.setPositionState({
+				duration: actualDuration,
+				playbackRate: audioRef.current.playbackRate,
+				position: safePosition,
+			});
+		}
 		}
 
 		return () => {

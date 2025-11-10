@@ -8,6 +8,9 @@ overrides:
   vite: npm:rolldown-vite@7.1.14
 
 dependencies:
+  canvas-confetti:
+    specifier: ^1.9.4
+    version: 1.9.4
   framer-motion:
     specifier: ^12.23.24
     version: 12.23.24(react-dom@19.2.0)(react@19.2.0)
@@ -28,6 +31,9 @@ devDependencies:
   '@tailwindcss/vite':
     specifier: ^4.1.17
     version: 4.1.17(rolldown-vite@7.1.14)
+  '@types/canvas-confetti':
+    specifier: ^1.9.0
+    version: 1.9.0
   '@types/node':
     specifier: ^24.6.0
     version: 24.10.0
@@ -792,6 +798,10 @@ packages:
       '@babel/types': 7.28.5
     dev: true
 
+  /@types/canvas-confetti@1.9.0:
+    resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
+    dev: true
+
   /@types/estree@1.0.8:
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
     dev: true
@@ -1083,6 +1093,10 @@ packages:
   /caniuse-lite@1.0.30001754:
     resolution: {integrity: sha512-x6OeBXueoAceOmotzx3PO4Zpt4rzpeIFsSr6AAePTZxSkXiYDUmpypEl7e2+8NCd9bD7bXjqyef8CJYPC1jfxg==}
     dev: true
+
+  /canvas-confetti@1.9.4:
+    resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==}
+    dev: false
 
   /chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
