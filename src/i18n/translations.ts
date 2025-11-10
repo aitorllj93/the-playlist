@@ -15,7 +15,7 @@ export const translations = {
     // Playlist
     track: 'track',
     tracks: 'tracks',
-    totalProgress: 'Total progress',
+    timeRemaining: 'Time remaining',
     noTracksInPlaylist: 'No tracks in the playlist',
     selectFolderWithM3u8: 'Select a folder with an m3u8 file',
 
@@ -72,7 +72,7 @@ export const translations = {
     // Playlist
     track: 'pista',
     tracks: 'pistas',
-    totalProgress: 'Progreso total',
+    timeRemaining: 'Tiempo restante',
     noTracksInPlaylist: 'No hay pistas en la lista',
     selectFolderWithM3u8: 'Selecciona una carpeta con un archivo m3u8',
 

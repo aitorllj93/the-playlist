@@ -32,6 +32,7 @@ export default function PlaylistView({
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const isTransitioningRef = useRef(false);
+  const isAutoScrollingRef = useRef(false);
   const trackRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
   useEffect(() => {
@@ -39,8 +40,8 @@ export default function PlaylistView({
     if (!container) return;
 
     const handleScroll = () => {
-      // No cambiar estado durante transición
-      if (isTransitioningRef.current) return;
+      // No cambiar estado durante transición o scroll automático
+      if (isTransitioningRef.current || isAutoScrollingRef.current) return;
 
       // Cancelar frame anterior si existe
       if (rafRef.current) {
@@ -51,9 +52,9 @@ export default function PlaylistView({
       rafRef.current = requestAnimationFrame(() => {
         const scrollTop = container.scrollTop;
 
-        // Umbral claro con histéresis grande
-        const shouldBeScrolled = scrollTop > 100;
-        const shouldBeExpanded = scrollTop < 20;
+        // Umbral con histéresis más amplia para evitar parpadeos
+        const shouldBeScrolled = scrollTop > 120;
+        const shouldBeExpanded = scrollTop < 10;
 
         if (shouldBeScrolled && !isScrolled) {
           isTransitioningRef.current = true;
@@ -85,10 +86,18 @@ export default function PlaylistView({
   useEffect(() => {
     const currentTrackElement = trackRefs.current.get(currentTrackIndex);
     if (currentTrackElement && containerRef.current) {
+      // Marcar que estamos haciendo scroll automático
+      isAutoScrollingRef.current = true;
+
       currentTrackElement.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       });
+
+      // Dar tiempo suficiente para que termine la animación de scroll
+      setTimeout(() => {
+        isAutoScrollingRef.current = false;
+      }, 1000);
     }
   }, [currentTrackIndex]);
 
@@ -131,8 +140,8 @@ export default function PlaylistView({
               {/* Textos de progreso - solo cuando no está scrolled */}
               {!isScrolled && (
                 <div className="flex justify-between text-sm text-[#b85e4f] font-medium tracking-wide animate-[fadeIn_0.3s_ease-out]">
-                  <span>{t('totalProgress')}</span>
-                  <span>{formatTime(currentPlaylistTime)} / {formatTime(totalDuration)}</span>
+                  <span>{t('timeRemaining')}</span>
+                  <span>{formatTime(totalDuration - currentPlaylistTime)}</span>
                 </div>
               )}
 
@@ -147,14 +156,14 @@ export default function PlaylistView({
                   {/* Mini-barras de "visualización de audio" */}
                   {isPlaying && !isScrolled && (
                     <div className="absolute inset-0 flex items-center justify-around px-1">
-                      {[...Array(8)].map((_, i) => (
+                      {[0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 0.55, 0.65].map((duration, i) => (
                         <div
-                          key={`audio-bar-${i}`}
+                          key={`audio-bar-${duration}-${i * 0.1}`}
                           className="w-0.5 bg-white/50 rounded-full"
                           style={{
                             height: '60%',
                             animationName: 'audio-bar',
-                            animationDuration: `${0.5 + Math.random() * 0.5}s`,
+                            animationDuration: `${duration}s`,
                             animationTimingFunction: 'ease-in-out',
                             animationIterationCount: 'infinite',
                             animationDirection: 'alternate',
